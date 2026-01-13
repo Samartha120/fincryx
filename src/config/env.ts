@@ -10,7 +10,9 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().min(1).default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().min(1).default('7d'),
 
-  CORS_ORIGIN: z.string().min(1).default('http://localhost:19006'),
+  // Comma-separated list of allowed browser origins.
+  // Example: "http://localhost:19006,https://your-web-app.com"
+  CORS_ORIGIN: z.string().optional().default('http://localhost:19006'),
 });
 
 export type Env = z.infer<typeof envSchema>;
