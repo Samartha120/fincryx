@@ -1,6 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-require("dotenv/config");
+// In production (e.g. Render), env vars are typically injected by the platform.
+// Keep dotenv optional so missing dependency doesn't crash the process.
+try {
+    const path_1 = require("path");
+    const dotenv_1 = require("dotenv");
+    // Load env from backend/.env even when started from repo root.
+    (0, dotenv_1.config)({ path: (0, path_1.resolve)(__dirname, '..', '.env') });
+}
+catch (_a) {
+    // Ignore: rely on process.env (platform-provided env vars).
+}
 const app_1 = require("./app");
 const db_1 = require("./config/db");
 const env_1 = require("./config/env");
