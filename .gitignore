@@ -30,6 +30,9 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# IDE
+.idea/
+
 # local env files
 .env*.local
 
@@ -39,6 +42,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# This repo is backend-only on GitHub
+mobile/
 
 # backend
 node_modules/
@@ -53,3 +59,7 @@ dist/
 .env.production.local
 .env.development.local
 .env.staging.local 
+
+# Allow committing backend build output
+!backend/dist/
+!backend/dist/**

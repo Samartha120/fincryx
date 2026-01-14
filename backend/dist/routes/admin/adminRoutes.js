@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.adminRouter = void 0;
+const express_1 = require("express");
+const adminAnalyticsController_1 = require("../../controllers/admin/adminAnalyticsController");
+const adminUsersController_1 = require("../../controllers/admin/adminUsersController");
+const authMiddleware_1 = require("../../middlewares/authMiddleware");
+const roleMiddleware_1 = require("../../middlewares/roleMiddleware");
+exports.adminRouter = (0, express_1.Router)();
+exports.adminRouter.get('/users', authMiddleware_1.requireAuth, (0, roleMiddleware_1.requireRole)('admin'), adminUsersController_1.listUsers);
+exports.adminRouter.get('/stats', authMiddleware_1.requireAuth, (0, roleMiddleware_1.requireRole)('admin'), adminAnalyticsController_1.getStats);
+exports.adminRouter.get('/transactions', authMiddleware_1.requireAuth, (0, roleMiddleware_1.requireRole)('admin'), adminAnalyticsController_1.getAllTransactions);
