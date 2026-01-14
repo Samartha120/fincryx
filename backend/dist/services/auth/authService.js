@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerCustomer = registerCustomer;
 exports.login = login;
 exports.verifyOtpAndIssueTokens = verifyOtpAndIssueTokens;
+exports.requestOtp = requestOtp;
+exports.requestPasswordReset = requestPasswordReset;
+exports.confirmPasswordReset = confirmPasswordReset;
 exports.refreshAccessToken = refreshAccessToken;
 exports.logout = logout;
 const mongoose_1 = require("mongoose");
@@ -36,7 +39,7 @@ async function registerCustomer(input) {
         currency: 'INR',
         balanceMinor: 0,
     });
-    const otpIssued = await (0, otpService_1.issueMockOtp)(email);
+    const otpIssued = await (0, otpService_1.issueOtp)(email);
     return { userId: user._id.toString(), otp: otpIssued.otp, otpExpiresAt: otpIssued.expiresAt };
 }
 async function login(input) {
@@ -48,7 +51,7 @@ async function login(input) {
     if (!ok)
         throw new errorMiddleware_1.ApiError(401, 'Invalid credentials');
     if (!user.isOtpVerified) {
-        const otpIssued = await (0, otpService_1.issueMockOtp)(email);
+        const otpIssued = await (0, otpService_1.issueOtp)(email);
         return { requiresOtp: true, otp: otpIssued.otp, otpExpiresAt: otpIssued.expiresAt };
     }
     const accessToken = (0, jwtService_1.signAccessToken)(user._id.toString(), user.role);
@@ -62,7 +65,7 @@ async function login(input) {
 }
 async function verifyOtpAndIssueTokens(input) {
     const email = input.email.toLowerCase();
-    await (0, otpService_1.verifyMockOtp)(email, input.otp);
+    await (0, otpService_1.verifyOtp)(email, input.otp);
     const user = await User_1.UserModel.findOne({ email });
     if (!user)
         throw new errorMiddleware_1.ApiError(404, 'User not found');
@@ -74,6 +77,27 @@ async function verifyOtpAndIssueTokens(input) {
         expiresAt: (0, jwtService_1.refreshTokenExpiryDate)(),
     });
     return { accessToken, refreshToken };
+}
+
+async function requestOtp(input) {
+    const email = input.email.toLowerCase();
+    const otpIssued = await (0, otpService_1.issueOtpIfUserExists)(email);
+    return { otp: otpIssued.otp, otpExpiresAt: otpIssued.expiresAt };
+}
+
+async function requestPasswordReset(input) {
+    const email = input.email.toLowerCase();
+    const issued = await (0, otpService_1.issuePasswordResetOtpIfUserExists)(email);
+    return { otp: issued.otp, otpExpiresAt: issued.expiresAt };
+}
+
+async function confirmPasswordReset(input) {
+    const email = input.email.toLowerCase();
+    const user = await (0, otpService_1.verifyPasswordResetOtp)(email, input.otp);
+    user.passwordHash = await (0, password_1.hashPassword)(input.newPassword);
+    user.passwordResetCodeHash = undefined;
+    user.passwordResetExpiresAt = undefined;
+    await user.save();
 }
 async function refreshAccessToken(refreshToken) {
     let payload;

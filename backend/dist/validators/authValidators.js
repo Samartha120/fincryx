@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutBodySchema = exports.refreshBodySchema = exports.otpVerifyBodySchema = exports.loginBodySchema = exports.registerBodySchema = void 0;
+exports.logoutBodySchema = exports.refreshBodySchema = exports.passwordResetConfirmBodySchema = exports.passwordResetRequestBodySchema = exports.otpVerifyBodySchema = exports.otpRequestBodySchema = exports.loginBodySchema = exports.registerBodySchema = void 0;
 const zod_1 = require("zod");
 exports.registerBodySchema = zod_1.z.object({
     fullName: zod_1.z.string().min(2).max(100),
@@ -14,7 +14,20 @@ exports.loginBodySchema = zod_1.z.object({
 });
 exports.otpVerifyBodySchema = zod_1.z.object({
     email: zod_1.z.string().email().max(255),
-    otp: zod_1.z.string().min(4).max(10),
+    otp: zod_1.z.string().regex(/^\d{6}$/),
+});
+exports.otpRequestBodySchema = zod_1.z.object({
+    email: zod_1.z.string().email().max(255),
+});
+
+exports.passwordResetRequestBodySchema = zod_1.z.object({
+    email: zod_1.z.string().email().max(255),
+});
+
+exports.passwordResetConfirmBodySchema = zod_1.z.object({
+    email: zod_1.z.string().email().max(255),
+    otp: zod_1.z.string().regex(/^\d{6}$/),
+    newPassword: zod_1.z.string().min(8).max(72),
 });
 exports.refreshBodySchema = zod_1.z.object({
     refreshToken: zod_1.z.string().min(10).optional(),

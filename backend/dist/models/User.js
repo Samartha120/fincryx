@@ -17,6 +17,8 @@ const userSchema = new mongoose_1.Schema({
     isOtpVerified: { type: Boolean, required: true, default: false, index: true },
     otpCodeHash: { type: String, required: false },
     otpExpiresAt: { type: Date, required: false, index: true },
+    passwordResetCodeHash: { type: String, required: false },
+    passwordResetExpiresAt: { type: Date, required: false, index: true },
 }, { timestamps: true });
 userSchema.index({ createdAt: -1 });
 exports.UserModel = (0, mongoose_1.model)('User', userSchema);
