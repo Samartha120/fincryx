@@ -15,12 +15,30 @@ const errorMiddleware_1 = require("./middlewares/errorMiddleware");
 const accountsRoutes_1 = require("./routes/accounts/accountsRoutes");
 const adminRoutes_1 = require("./routes/admin/adminRoutes");
 const authRoutes_1 = require("./routes/auth/authRoutes");
+const userRoutes_1 = require("./routes/user/userRoutes");
 const loansRoutes_1 = require("./routes/loans/loansRoutes");
 const transactionsRoutes_1 = require("./routes/transactions/transactionsRoutes");
 function createApp() {
     const app = (0, express_1.default)();
     const env = (0, env_1.getEnv)();
     app.disable('x-powered-by');
+
+    // Render (and most managed platforms) run behind a reverse proxy.
+    // express-rate-limit throws if it sees X-Forwarded-For while trust proxy is false.
+    const trustProxyEnv = (process.env.TRUST_PROXY || '').toLowerCase();
+    const shouldTrustProxy = trustProxyEnv === '1' ||
+        trustProxyEnv === 'true' ||
+        trustProxyEnv === 'yes' ||
+        env.NODE_ENV === 'production' ||
+        Boolean(process.env.RENDER) ||
+        Boolean(process.env.RENDER_EXTERNAL_URL);
+    if (shouldTrustProxy) {
+        app.set('trust proxy', 1);
+        if (process.env.NODE_ENV !== 'test') {
+            console.log('[config] trust proxy enabled');
+        }
+    }
+
     app.use((0, helmet_1.default)());
     app.use((0, cors_1.default)({
         origin: (origin, callback) => {
@@ -52,6 +70,7 @@ function createApp() {
         res.json({ ok: true, name: 'Finoryx API' });
     });
     app.use(['/auth', '/api/auth'], authLimiter, authRoutes_1.authRouter);
+    app.use(['/user', '/api/user'], userRoutes_1.userRouter);
     app.use(['/admin', '/api/admin'], adminRoutes_1.adminRouter);
     app.use(['/accounts', '/api/accounts'], accountsRoutes_1.accountsRouter);
     app.use(['/loans', '/api/loans'], loansRoutes_1.loansRouter);
