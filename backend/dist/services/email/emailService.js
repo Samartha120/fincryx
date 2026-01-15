@@ -11,6 +11,15 @@ function hasSmtpConfig() {
     return !!(process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
+function withTimeout(promise, timeoutMs, label) {
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
+    });
+    // Ensure the original promise is observed even if the timeout wins.
+    promise.catch(() => { });
+    return Promise.race([promise, timeoutPromise]);
+}
+
 async function sendOtpEmail(params) {
     const { to, code, expiresMinutes } = params;
 
@@ -34,6 +43,9 @@ async function sendOtpEmail(params) {
         port,
         secure,
         auth: { user, pass },
+        connectionTimeout: 6000,
+        greetingTimeout: 6000,
+        socketTimeout: 8000,
     });
 
     const subject = `${appName} verification code`;
@@ -51,13 +63,20 @@ async function sendOtpEmail(params) {
   <p style="margin: 12px 0 0; color: #6B7280;">If you didn’t request this, you can ignore this email.</p>
 </div>`;
 
-    await transporter.sendMail({
-        from,
-        to,
-        subject,
-        text,
-        html,
-    });
+    try {
+        await withTimeout(transporter.sendMail({
+            from,
+            to,
+            subject,
+            text,
+            html,
+        }), 9000, 'sendOtpEmail');
+    }
+    catch (err) {
+        // Fail open: OTP issuance must not hang the API.
+        console.warn(`[OTP] Failed to send email to ${to}.`, err instanceof Error ? err.message : err);
+        console.log(`[OTP] Code for ${to}: ${code} (expires in ${expiresMinutes} minutes)`);
+    }
 }
 
 async function sendPasswordResetEmail(params) {
@@ -83,6 +102,9 @@ async function sendPasswordResetEmail(params) {
         port,
         secure,
         auth: { user, pass },
+        connectionTimeout: 6000,
+        greetingTimeout: 6000,
+        socketTimeout: 8000,
     });
 
     const subject = `${appName} password reset code`;
@@ -99,11 +121,18 @@ async function sendPasswordResetEmail(params) {
   <p style="margin: 12px 0 0; color: #6B7280;">If you didn’t request this, you can ignore this email.</p>
 </div>`;
 
-    await transporter.sendMail({
-        from,
-        to,
-        subject,
-        text,
-        html,
-    });
+    try {
+        await withTimeout(transporter.sendMail({
+            from,
+            to,
+            subject,
+            text,
+            html,
+        }), 9000, 'sendPasswordResetEmail');
+    }
+    catch (err) {
+        // Fail open: reset code issuance must not hang the API.
+        console.warn(`[RESET] Failed to send email to ${to}.`, err instanceof Error ? err.message : err);
+        console.log(`[RESET] Code for ${to}: ${code} (expires in ${expiresMinutes} minutes)`);
+    }
 }
