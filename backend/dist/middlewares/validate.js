@@ -23,7 +23,7 @@ function validateQuery(schema) {
             next(new errorMiddleware_1.ApiError(400, 'Validation error', parsed.error.flatten()));
             return;
         }
-        req.query = parsed.data;
+        Object.assign(req.query, parsed.data);
         next();
     };
 }

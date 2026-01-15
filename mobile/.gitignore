@@ -30,9 +30,6 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# IDE
-.idea/
-
 # local env files
 .env*.local
 
@@ -42,23 +39,3 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-
-# Mobile app (required for EAS builds)
-
-# backend
-node_modules/
-dist/
-.env.local
-.env   
-.env.test
-.env.production
-.env.development
-.env.staging
-.env.test.local
-.env.production.local
-.env.development.local
-.env.staging.local 
-
-# Allow committing backend build output
-!backend/dist/
-!backend/dist/**

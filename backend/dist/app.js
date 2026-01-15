@@ -21,6 +21,10 @@ const transactionsRoutes_1 = require("./routes/transactions/transactionsRoutes")
 const analyticsRoutes_1 = require("./routes/analytics/analyticsRoutes");
 function createApp() {
     const app = (0, express_1.default)();
+    // Disable built-in query parser to prevent "Cannot set property query" error 
+    // if req.query is getter-only. We will handle parsing if needed or rely on the getter.
+    app.set('query parser', false);
+
     const env = (0, env_1.getEnv)();
     app.disable('x-powered-by');
 

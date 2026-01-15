@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	/* Brand */
+	--color-primary: 30 64 175; /* #1E40AF */
+	--color-primary-light: 59 130 246; /* #3B82F6 */
+	--color-primary-dark: 30 58 138; /* #1E3A8A */
+
+	/* Surfaces */
+	--color-background: 249 250 251; /* #F9FAFB */
+	--color-surface: 255 255 255; /* #FFFFFF */
+
+	/* Text */
+	--color-text-primary: 17 24 39; /* #111827 */
+	--color-text-secondary: 107 114 128; /* #6B7280 */
+	--color-text-muted: 156 163 175; /* #9CA3AF */
+
+	/* Status */
+	--color-error: 220 38 38; /* #DC2626 */
+	--color-success: 5 150 105; /* #059669 */
+	--color-warning: 217 119 6; /* #D97706 */
+
+	/* Borders */
+	--color-border: 229 231 235; /* #E5E7EB */
+	--color-border-light: 243 244 246; /* #F3F4F6 */
+}
+
+.dark {
+	/* Surfaces */
+	--color-background: 11 16 32; /* #0B1020 */
+	--color-surface: 17 26 51; /* #111A33 */
+
+	/* Text */
+	--color-text-primary: 234 240 255; /* #EAF0FF */
+	--color-text-secondary: 176 191 228; /* softer */
+	--color-text-muted: 122 140 178;
+
+	/* Borders */
+	--color-border: 39 51 83;
+	--color-border-light: 30 40 70;
+}
