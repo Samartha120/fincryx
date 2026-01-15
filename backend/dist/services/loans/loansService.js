@@ -12,6 +12,7 @@ const Loan_1 = require("../../models/Loan");
 const Transaction_1 = require("../../models/Transaction");
 const emi_1 = require("../../utils/loans/emi");
 const refs_1 = require("../../utils/refs");
+const pushService_1 = require("../notifications/pushService");
 async function applyLoan(input) {
     const userObjectId = new mongoose_1.Types.ObjectId(input.userId);
     const accountObjectId = new mongoose_1.Types.ObjectId(input.accountId);
@@ -31,6 +32,11 @@ async function applyLoan(input) {
         principalMinor: loan.principalMinor,
         annualInterestBps: loan.annualInterestBps,
         termMonths: loan.termMonths,
+    });
+    await (0, pushService_1.sendUserNotification)(input.userId, {
+        title: 'Loan application submitted',
+        body: `Your loan request for ${loan.principalMinor} ${loan.currency} is pending review.`,
+        data: { type: 'loan', status: 'pending', loanId: loan._id.toString() },
     });
     return {
         loan,
@@ -107,8 +113,18 @@ async function decideLoanAdmin(input) {
                         note: `Loan approved${input.decisionNote ? `: ${input.decisionNote}` : ''}`,
                     },
                 ], { session });
+                await (0, pushService_1.sendUserNotification)(loan.userId.toString(), {
+                    title: 'Loan approved',
+                    body: `Your loan of ${loan.principalMinor} ${loan.currency} was approved and disbursed.`,
+                    data: { type: 'loan', status: 'approved', loanId: loan._id.toString(), reference },
+                });
                 return { loan, reference };
             }
+            await (0, pushService_1.sendUserNotification)(loan.userId.toString(), {
+                title: 'Loan update',
+                body: `Your loan request was ${input.decision}.`,
+                data: { type: 'loan', status: input.decision, loanId: loan._id.toString() },
+            });
             return { loan };
         });
         return result;

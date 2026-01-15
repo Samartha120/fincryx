@@ -8,3 +8,4 @@ exports.userRouter = (0, express_1.Router)();
 
 // Profile
 exports.userRouter.get('/me', authMiddleware_1.requireAuth, userController_1.getMe);
+exports.userRouter.post('/push-token', authMiddleware_1.requireAuth, userController_1.registerPushToken);

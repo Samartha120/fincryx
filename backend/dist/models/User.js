@@ -19,6 +19,7 @@ const userSchema = new mongoose_1.Schema({
     otpExpiresAt: { type: Date, required: false, index: true },
     passwordResetCodeHash: { type: String, required: false },
     passwordResetExpiresAt: { type: Date, required: false, index: true },
+    pushTokens: { type: [String], required: false, default: [] },
 }, { timestamps: true });
 userSchema.index({ createdAt: -1 });
 exports.UserModel = (0, mongoose_1.model)('User', userSchema);

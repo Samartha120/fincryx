@@ -7,6 +7,7 @@ const errorMiddleware_1 = require("../../middlewares/errorMiddleware");
 const Account_1 = require("../../models/Account");
 const Transaction_1 = require("../../models/Transaction");
 const refs_1 = require("../../utils/refs");
+const pushService_1 = require("../notifications/pushService");
 async function listAccounts(userId) {
     const userObjectId = new mongoose_1.Types.ObjectId(userId);
     const accounts = await Account_1.AccountModel.find({ userId: userObjectId })
@@ -50,6 +51,13 @@ async function transferInternal(input) {
                 },
             ], { session });
         });
+        await (0, pushService_1.sendUserNotification)(input.userId, {
+            title: 'Transfer completed',
+            body: `Transfer of ${input.amountMinor} ${from.currency} sent successfully.`,
+            includeDailySpend: true,
+            data: { type: 'transfer', reference },
+        });
+        await (0, pushService_1.sendDailySpendNotification)(input.userId, from.currency);
         return { reference };
     }
     finally {
