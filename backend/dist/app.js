@@ -18,6 +18,7 @@ const authRoutes_1 = require("./routes/auth/authRoutes");
 const userRoutes_1 = require("./routes/user/userRoutes");
 const loansRoutes_1 = require("./routes/loans/loansRoutes");
 const transactionsRoutes_1 = require("./routes/transactions/transactionsRoutes");
+const analyticsRoutes_1 = require("./routes/analytics/analyticsRoutes");
 function createApp() {
     const app = (0, express_1.default)();
     const env = (0, env_1.getEnv)();
@@ -75,6 +76,7 @@ function createApp() {
     app.use(['/accounts', '/api/accounts'], accountsRoutes_1.accountsRouter);
     app.use(['/loans', '/api/loans'], loansRoutes_1.loansRouter);
     app.use(['/transactions', '/api/transactions'], transactionsRoutes_1.transactionsRouter);
+    app.use(['/analytics', '/api/analytics'], analyticsRoutes_1.analyticsRouter);
     app.use(errorMiddleware_1.notFoundHandler);
     app.use(errorMiddleware_1.errorHandler);
     return app;

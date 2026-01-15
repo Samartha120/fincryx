@@ -16,12 +16,21 @@ exports.ApiError = ApiError;
 function notFoundHandler(req, res) {
     res.status(404).json({ message: `Route not found: ${req.method} ${req.path}` });
 }
-function errorHandler(err, _req, res, _next) {
+function errorHandler(err, req, res, _next) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isTest = process.env.NODE_ENV === 'test';
+    if (!isTest) {
+        if (err instanceof Error) {
+            console.error('[error]', req.method, req.path, err.message, err.stack);
+        }
+        else {
+            console.error('[error]', req.method, req.path, String(err));
+        }
+    }
     if (err instanceof ApiError) {
         res.status(err.statusCode).json({ message: err.message, details: err.details });
         return;
     }
-    const isProduction = process.env.NODE_ENV === 'production';
     const message = isProduction ? 'Internal Server Error' : err instanceof Error ? err.message : 'Internal Server Error';
     res.status(500).json({ message });
 }

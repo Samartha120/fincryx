@@ -21,9 +21,7 @@ async function getLoans(req, res) {
     const userId = req.auth?.userId;
     if (!userId)
         throw new errorMiddleware_1.ApiError(401, 'Unauthorized');
-    const page = Math.max(1, Number(req.query.page || 1));
-    const limit = Math.min(100, Math.max(1, Number(req.query.limit || 20)));
-    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+    const { page, limit, status } = req.query;
     const result = await (0, loansService_1.listCustomerLoans)({ userId, page, limit, status });
     res.json(result);
 }
@@ -37,9 +35,7 @@ async function getLoanById(req, res) {
     res.json(result);
 }
 async function adminGetLoans(req, res) {
-    const page = Math.max(1, Number(req.query.page || 1));
-    const limit = Math.min(100, Math.max(1, Number(req.query.limit || 20)));
-    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+    const { page, limit, status } = req.query;
     const result = await (0, loansService_1.listPendingLoansAdmin)({ page, limit, status });
     res.json(result);
 }

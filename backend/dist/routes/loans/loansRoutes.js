@@ -8,10 +8,8 @@ const roleMiddleware_1 = require("../../middlewares/roleMiddleware");
 const validate_1 = require("../../middlewares/validate");
 const loansValidators_1 = require("../../validators/loans/loansValidators");
 exports.loansRouter = (0, express_1.Router)();
-// Admin
-exports.loansRouter.get('/admin/all', authMiddleware_1.requireAuth, (0, roleMiddleware_1.requireRole)('admin'), loansController_1.adminGetLoans);
+exports.loansRouter.get('/admin/all', authMiddleware_1.requireAuth, (0, roleMiddleware_1.requireRole)('admin'), (0, validate_1.validateQuery)(loansValidators_1.listLoansQuerySchema), loansController_1.adminGetLoans);
 exports.loansRouter.post('/admin/:loanId/decision', authMiddleware_1.requireAuth, (0, roleMiddleware_1.requireRole)('admin'), (0, validate_1.validateBody)(loansValidators_1.adminDecisionBodySchema), loansController_1.adminDecideLoan);
-// Customer
 exports.loansRouter.post('/', authMiddleware_1.requireAuth, (0, validate_1.validateBody)(loansValidators_1.applyLoanBodySchema), loansController_1.postApplyLoan);
-exports.loansRouter.get('/', authMiddleware_1.requireAuth, loansController_1.getLoans);
+exports.loansRouter.get('/', authMiddleware_1.requireAuth, (0, validate_1.validateQuery)(loansValidators_1.listLoansQuerySchema), loansController_1.getLoans);
 exports.loansRouter.get('/:loanId', authMiddleware_1.requireAuth, loansController_1.getLoanById);
