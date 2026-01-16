@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Platform, Text, useWindowDimensions, View } from 'react-native';
+import { Line } from 'react-native-svg';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup } from 'victory-native';
 
 import { Card } from '@/src/components/ui/Card';

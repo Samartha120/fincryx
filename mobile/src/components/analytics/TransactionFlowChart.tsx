@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from 'react';
 import { Platform, Text, useWindowDimensions, View } from 'react-native';
-import { Defs, LinearGradient, Stop } from 'react-native-svg';
+import { Defs, LinearGradient, Line, Stop } from 'react-native-svg';
 import { VictoryArea, VictoryAxis, VictoryChart, VictoryGroup } from 'victory-native';
 
 import type { TransactionAnalytics } from '@/src/api/analyticsApi';
