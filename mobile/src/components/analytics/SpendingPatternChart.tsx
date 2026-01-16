@@ -1,7 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Platform, Text, useWindowDimensions, View } from 'react-native';
-import { G } from 'react-native-svg';
-import { VictoryPie } from 'victory-native';
+import { Text, View } from 'react-native';
 
 import type { Account } from '@/src/api/accountsApi';
 import type { Transaction } from '@/src/api/transactionsApi';
@@ -45,10 +43,6 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
   accounts,
   transactions,
 }: Props) {
-  const { width: windowWidth } = useWindowDimensions();
-  // Adjust chart size to be roughly half the available width if we want side-by-side
-  const chartSize = 160;
-
   const safe = useMemo(() => {
     const accountIdSet = new Set(accounts.map((a) => a._id));
     const debitTxs = transactions.filter((t) => t.status === 'completed' && isDebit(t, accountIdSet));
@@ -87,8 +81,6 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
     );
   }
 
-  const showCharts = Platform.OS === 'web' || Platform.OS === 'ios' || Platform.OS === 'android';
-
   return (
     <Card>
       <View className="mb-4">
@@ -97,13 +89,23 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
       </View>
 
       <View className="flex-row items-center justify-between">
-        {/* Custom Legend / List */}
         <View className="flex-1 gap-3 mr-4">
           {safe.slices.map((slice) => (
             <View key={slice.label} className="flex-row items-center justify-between">
               <View className="flex-row items-center gap-2">
                 <View className="w-3 h-3 rounded-full" style={{ backgroundColor: slice.color }} />
-                <Text className="text-body text-text-primary text-xs font-medium">{slice.label}</Text>
+              </View>
+              <View className="flex-1 mx-2">
+                <Text className="text-body text-text-primary text-xs font-medium mb-1">{slice.label}</Text>
+                <View className="h-2 rounded-full bg-border-light overflow-hidden">
+                  <View
+                    className="h-2 rounded-full"
+                    style={{
+                      width: `${Math.max(4, Math.min(100, slice.percentage))}%`,
+                      backgroundColor: slice.color,
+                    }}
+                  />
+                </View>
               </View>
               <View className="items-end">
                 <Text className="text-xs font-bold text-text-primary">{Math.round(slice.percentage)}%</Text>
@@ -118,26 +120,7 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
           </View>
         </View>
 
-        {showCharts ? (
-          <View>
-            <VictoryPie
-              width={chartSize}
-              height={chartSize}
-              padding={0}
-              data={safe.pieData}
-              colorScale={safe.colors}
-              innerRadius={chartSize / 2 - 16}
-              radius={chartSize / 2}
-              cornerRadius={4}
-              padAngle={2}
-              labels={() => null} // No labels on the pie itself, we use the legend
-              animate={{ duration: 500 }}
-              groupComponent={<G />}
-            />
-          </View>
-        ) : (
-          <Text>Chart unavailable</Text>
-        )}
+        <View className="w-6" />
       </View>
     </Card>
   );
