@@ -99,6 +99,7 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
                             }}
                             axisComponent={<Line />}
                             gridComponent={<Line />}
+                            tickLabelComponent={<VictoryLabel />}
                         />
                         <VictoryAxis
                             dependentAxis
@@ -110,6 +111,7 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
                             }}
                             axisComponent={<Line />}
                             gridComponent={<Line />}
+                            tickLabelComponent={<VictoryLabel />}
                         />
 
                         <VictoryGroup offset={12}>
