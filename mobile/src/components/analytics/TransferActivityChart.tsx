@@ -92,14 +92,22 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
                         padding={{ top: 10, bottom: 40, left: 50, right: 20 }}
                         groupComponent={<G />}
                     >
+// Wrapper to sanitize props for native Line component
+const SafeLine = (props: any) => {
+    const {pointerEvents, ...rest } = props;
+                        return <Line {...rest} pointerEvents="none" />;
+};
+
+                        // ...
+
                         <VictoryAxis
                             style={{
                                 axis: { stroke: 'transparent' },
                                 tickLabels: { fill: '#9CA3AF', fontSize: 10 },
                                 grid: { stroke: 'transparent' },
                             }}
-                            axisComponent={<Line />}
-                            gridComponent={<Line />}
+                            axisComponent={<SafeLine />}
+                            gridComponent={<SafeLine />}
                             tickLabelComponent={<VictoryLabel />}
                             groupComponent={<G />}
                         />
@@ -111,8 +119,8 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
                                 tickLabels: { fill: '#9CA3AF', fontSize: 10, padding: 5 },
                                 grid: { stroke: '#E5E7EB', strokeDasharray: '4, 4' },
                             }}
-                            axisComponent={<Line />}
-                            gridComponent={<Line />}
+                            axisComponent={<SafeLine />}
+                            gridComponent={<SafeLine />}
                             tickLabelComponent={<VictoryLabel />}
                             groupComponent={<G />}
                         />

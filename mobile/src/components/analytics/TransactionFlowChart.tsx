@@ -155,6 +155,19 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
               </LinearGradient>
             </Defs>
 
+// ... imports
+
+// Wrapper to sanitize props for native Line component
+const SafeLine = (props: any) => {
+  // Filter out invalid pointerEvents that Victory might pass
+  const {pointerEvents, ...rest } = props;
+            return <Line {...rest} pointerEvents="none" />;
+};
+
+            // ... type Props ...
+
+            // ... inside TransactionFlowChart ...
+
             <VictoryAxis
               tickValues={tickValues}
               style={{
@@ -162,8 +175,8 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
                 tickLabels: { fill: '#9CA3AF', fontSize: 10 },
                 grid: { stroke: 'transparent' },
               }}
-              axisComponent={<Line />}
-              gridComponent={<Line />}
+              axisComponent={<SafeLine />}
+              gridComponent={<SafeLine />}
               tickLabelComponent={<VictoryLabel />}
               groupComponent={<G />}
             />
@@ -176,8 +189,8 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
                 tickLabels: { fill: '#9CA3AF', fontSize: 10, padding: 5 },
                 grid: { stroke: '#E5E7EB', strokeDasharray: '4, 4' }, // Keep grid lines, should be safe
               }}
-              axisComponent={<Line />}
-              gridComponent={<Line />}
+              axisComponent={<SafeLine />}
+              gridComponent={<SafeLine />}
               tickLabelComponent={<VictoryLabel />}
               groupComponent={<G />}
             />
