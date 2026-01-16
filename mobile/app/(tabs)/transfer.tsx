@@ -3,8 +3,9 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View, TextInput } from 'react-native';
 import { z } from 'zod';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import { getAccounts, transfer, type Account } from '@/src/api/accountsApi';
 import { AnimatedIn } from '@/src/components/ui/AnimatedIn';
@@ -12,10 +13,8 @@ import { Button } from '@/src/components/ui/Button';
 import { CardContainer } from '@/src/components/ui/CardContainer';
 import { Input } from '@/src/components/ui/Input';
 import { Screen } from '@/src/components/ui/Screen';
-import { ScreenHeader } from '@/src/components/ui/ScreenHeader';
 import { ScreenTransition } from '@/src/components/ui/ScreenTransition';
-import { SectionHeader } from '@/src/components/ui/SectionHeader';
-import { parseAmountToMinor } from '@/src/lib/money';
+import { parseAmountToMinor, formatMoneyMinor } from '@/src/lib/money';
 
 const schema = z.object({
   fromAccountId: z.string().min(1, 'Select a source account'),
@@ -53,10 +52,10 @@ export default function TransferScreen() {
   });
 
   const fromAccountId = watch('fromAccountId');
+  const amount = watch('amount');
 
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       try {
         const res = await getAccounts();
@@ -70,13 +69,10 @@ export default function TransferScreen() {
         if (mounted) setLoadingAccounts(false);
       }
     })();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [setValue]);
 
-  const amountMinor = useMemo(() => parseAmountToMinor(watch('amount')), [watch]);
+  const selectedAccount = useMemo(() => accounts.find(a => a._id === fromAccountId), [accounts, fromAccountId]);
 
   const canSubmit = Boolean(fromAccountId) && !loadingAccounts && !isSubmitting;
 
@@ -108,141 +104,139 @@ export default function TransferScreen() {
     );
   }
 
+  // Success State
+  if (successRef) {
+    return (
+      <Screen className="items-center justify-center bg-success/5 px-6">
+        <AnimatedIn>
+          <View className="items-center gap-6">
+            <View className="w-20 h-20 bg-success/20 rounded-full items-center justify-center">
+              <FontAwesome name="check" size={40} color="#15803d" />
+            </View>
+            <View className="items-center">
+              <Text className="text-2xl font-bold text-text-primary">Transfer Sent!</Text>
+              <Text className="text-body text-text-secondary mt-2 text-center">
+                Your money is on its way. Reference: {successRef}
+              </Text>
+            </View>
+            <Button
+              title="Done"
+              onPress={() => {
+                setSuccessRef(null);
+                router.replace('/(tabs)/transactions');
+              }}
+              className="w-full min-w-[200px]"
+            />
+          </View>
+        </AnimatedIn>
+      </Screen>
+    );
+  }
+
   return (
-    <Screen edges={['top', 'left', 'right']}>
+    <Screen edges={['top', 'left', 'right']} className="bg-white dark:bg-neutral-900">
       <ScreenTransition>
         <ScrollView contentContainerClassName="px-md pt-md pb-lg">
-          <AnimatedIn>
-            <ScreenHeader title="Transfer" subtitle="Move money instantly and securely" />
-          </AnimatedIn>
 
-        <View className="mt-4 gap-3">
+          {/* Header */}
+          <View className="items-center mb-8">
+            <Text className="text-lg font-semibold text-text-secondary">Send Money</Text>
+          </View>
+
           {serverError ? (
-            <AnimatedIn delayMs={60}>
-              <CardContainer variant="error" className="gap-2">
-                <Text className="text-label text-error">{serverError}</Text>
-              </CardContainer>
-            </AnimatedIn>
+            <View className="mb-4 bg-error/10 p-4 rounded-xl">
+              <Text className="text-error text-center">{serverError}</Text>
+            </View>
           ) : null}
 
-          {successRef ? (
-            <AnimatedIn delayMs={100}>
-              <CardContainer className="gap-2">
-                <Text className="text-label text-text-primary font-semibold">Transfer completed</Text>
-                <Text className="text-success mt-1">{successRef}</Text>
-
-                <View className="mt-3">
-                  <Button
-                    testID="transfer-view-transactions"
-                    title="View history"
-                    variant="secondary"
-                    onPress={() => router.push('/(tabs)/transactions')}
-                  />
-                </View>
-              </CardContainer>
-            </AnimatedIn>
-          ) : null}
-
-          <AnimatedIn delayMs={140}>
-            <SectionHeader title="Transfer details" subtitle="Choose accounts and enter amount" className="mt-2" />
-          </AnimatedIn>
-
-          <AnimatedIn delayMs={180}>
-            <CardContainer className="gap-4" variant="subtle">
-              <View className="gap-2">
-                <Text className="text-body text-text-secondary">From account</Text>
-                <Controller
-                  control={control}
-                  name="fromAccountId"
-                  render={({ field: { value, onChange } }) => (
-                    <View className="gap-2">
-                      {accounts.map((a) => {
-                        const selected = a._id === value;
-                        return (
-                          <Pressable
-                            key={a._id}
-                            testID={`from-${a._id}`}
-                            onPress={() => onChange(a._id)}
-                            className={
-                              selected
-                                ? 'rounded-input border border-primary bg-primary/10 px-4 py-3'
-                                : 'rounded-input border border-border bg-surface px-4 py-3'
-                            }
-                          >
-                            <Text className="text-label text-text-primary font-semibold">{a.type.toUpperCase()}</Text>
-                            <Text className="text-caption text-text-secondary mt-1">{a.accountNumber}</Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  )}
-                />
-                {errors.fromAccountId ? (
-                  <Text className="text-caption text-error">{errors.fromAccountId.message}</Text>
-                ) : null}
-              </View>
-
-              <Controller
-                control={control}
-                name="toAccountNumber"
-                render={({ field: { value, onChange } }) => (
-                  <Input
-                    label="To account number"
-                    testID="transfer-toAccountNumber"
-                    value={value}
-                    onChangeText={onChange}
-                    autoCapitalize="none"
-                    placeholder="1234567890"
-                    error={errors.toAccountNumber?.message}
-                  />
-                )}
-              />
-
+          {/* Huge Amount Input */}
+          <View className="items-center mb-8">
+            <View className="flex-row items-center justify-center">
+              <Text className="text-4xl font-bold text-text-secondary mr-1">{selectedAccount?.currency ?? '$'}</Text>
               <Controller
                 control={control}
                 name="amount"
                 render={({ field: { value, onChange } }) => (
-                  <Input
-                    label="Amount"
-                    testID="transfer-amount"
+                  <TextInput
                     value={value}
                     onChangeText={onChange}
                     keyboardType="decimal-pad"
-                    placeholder="0.00"
-                    error={errors.amount?.message}
+                    placeholder="0"
+                    placeholderTextColor="#9CA3AF"
+                    style={{ fontSize: 64, fontWeight: 'bold', color: colorScheme === 'dark' ? '#FFF' : '#1F2937' }}
+                    autoFocus
                   />
                 )}
               />
+            </View>
+            {errors.amount && <Text className="text-error mt-2">{errors.amount.message}</Text>}
+          </View>
 
-              {amountMinor !== null ? (
-                <Text className="text-caption text-text-secondary">Minor units: {amountMinor}</Text>
-              ) : null}
+          {/* From Account Selector (Simple) */}
+          <View className="mb-6">
+            <Text className="text-xs text-text-secondary font-medium uppercase tracking-wider mb-2">From</Text>
+            <Controller
+              control={control}
+              name="fromAccountId"
+              render={({ field: { value, onChange } }) => (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                  {accounts.map(a => (
+                    <Pressable
+                      key={a._id}
+                      onPress={() => onChange(a._id)}
+                      className={`px-4 py-3 rounded-2xl border ${value === a._id ? 'bg-primary border-primary' : 'bg-neutral-50 border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700'}`}
+                    >
+                      <Text className={value === a._id ? 'text-white font-semibold' : 'text-text-primary font-medium'}>{a.type.toUpperCase()}</Text>
+                      <Text className={`text-xs mt-1 ${value === a._id ? 'text-blue-100' : 'text-text-secondary'}`}>{formatMoneyMinor(a.balanceMinor, a.currency)}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              )}
+            />
+          </View>
 
-              <Controller
-                control={control}
-                name="note"
-                render={({ field: { value, onChange } }) => (
-                  <Input
-                    label="Note (optional)"
-                    testID="transfer-note"
-                    value={value ?? ''}
-                    onChangeText={onChange}
-                    placeholder="For rent, groceries, ..."
-                    error={errors.note?.message}
-                  />
-                )}
-              />
 
-              <Button
-                testID="transfer-submit"
-                title="Send"
-                loading={isSubmitting}
-                disabled={!canSubmit}
-                onPress={handleSubmit(onSubmit)}
-              />
-            </CardContainer>
-          </AnimatedIn>
-        </View>
+          {/* To Section */}
+          <View className="gap-4">
+            <Controller
+              control={control}
+              name="toAccountNumber"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  label="To Account"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Account Number"
+                  error={errors.toAccountNumber?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="note"
+              render={({ field: { value, onChange } }) => (
+                <Input
+                  label="Note"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="What's this for?"
+                  error={errors.note?.message}
+                />
+              )}
+            />
+          </View>
+
+          <View className="mt-8">
+            <Button
+              title={isSubmitting ? "Sending..." : "Send Money"}
+              onPress={handleSubmit(onSubmit)}
+              loading={isSubmitting}
+              disabled={!canSubmit}
+              variant="primary"
+            />
+          </View>
+
         </ScrollView>
       </ScreenTransition>
     </Screen>

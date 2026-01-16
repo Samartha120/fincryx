@@ -1,9 +1,11 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Platform, Text, useWindowDimensions, View } from 'react-native';
-import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryLegend } from 'victory-native';
+import { Defs, LinearGradient, Stop } from 'react-native-svg';
+import { VictoryArea, VictoryAxis, VictoryChart, VictoryGroup } from 'victory-native';
 
 import type { TransactionAnalytics } from '@/src/api/analyticsApi';
 import { Card } from '@/src/components/ui/Card';
+import { cn } from '@/src/lib/cn';
 
 type Props = {
   title?: string;
@@ -23,9 +25,8 @@ function formatCompact(value: number): string {
 function Skeleton() {
   return (
     <Card className="gap-3">
-      <View className="h-4 w-40 rounded bg-border-light" />
-      <View className="h-44 w-full rounded bg-border-light" />
-      <View className="h-3 w-56 rounded bg-border-light" />
+      <View className="h-4 w-40 rounded bg-border-light animate-pulse" />
+      <View className="h-56 w-full rounded-lg bg-gray-100 dark:bg-neutral-800 animate-pulse" />
     </Card>
   );
 }
@@ -37,7 +38,8 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
   error,
 }: Props) {
   const { width: windowWidth } = useWindowDimensions();
-  const chartWidth = Math.max(320, Math.floor(windowWidth - 24 * 2));
+  const chartWidth = Math.max(320, windowWidth - 48); // Full width minus padding
+  const [activePoint, setActivePoint] = useState<{ label: string; credit: number; debit: number } | null>(null);
 
   const safe = useMemo(() => {
     const labels = data?.labels ?? [];
@@ -54,69 +56,109 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
       hasData: labels.length > 0,
       creditSeries: points.map((p) => ({ x: p.label, y: p.credit })),
       debitSeries: points.map((p) => ({ x: p.label, y: p.debit })),
+      points,
       labels,
     };
   }, [data]);
 
   const tickValues = useMemo(() => {
     if (safe.labels.length <= 8) return safe.labels;
-    // Show every other tick label for dense charts.
-    return safe.labels.filter((_, idx) => idx % 2 === 0);
+    // Show reduced ticks for dense data
+    const interval = Math.ceil(safe.labels.length / 6);
+    return safe.labels.filter((_, idx) => idx % interval === 0);
   }, [safe.labels]);
 
   if (loading) return <Skeleton />;
 
   if (error) {
     return (
-      <Card className="gap-2 border-error/20 bg-error/10">
-        <Text className="text-label text-text-primary font-semibold">{title}</Text>
+      <Card className="gap-2 border-error/20 bg-error/5">
+        <Text className="text-label text-error font-semibold">{title}</Text>
         <Text className="text-caption text-error">{error}</Text>
-        <Text className="text-caption text-text-secondary">Pull to refresh to retry.</Text>
       </Card>
     );
   }
 
   if (!safe.hasData) {
     return (
-      <Card className="gap-2">
-        <Text className="text-label text-text-primary font-semibold">{title}</Text>
-        <Text className="text-body text-text-secondary">No transaction analytics yet.</Text>
+      <Card className="gap-2 items-center justify-center py-12">
+        <Text className="text-label text-text-secondary">No transaction history available.</Text>
       </Card>
     );
   }
 
-  const showCharts = Platform.OS === 'web';
+  const showCharts = Platform.OS === 'web' || Platform.OS === 'ios' || Platform.OS === 'android';
+
+  const maxVal = Math.max(
+    ...safe.creditSeries.map((d) => d.y),
+    ...safe.debitSeries.map((d) => d.y),
+    100
+  );
 
   return (
-    <Card className="gap-2">
-      <Text className="text-label text-text-primary font-semibold">{title}</Text>
-      <Text className="text-caption text-text-secondary">Credit (green) vs Debit (red)</Text>
+    <Card className="overflow-visible pb-2">
+      {/* Dynamic Header */}
+      <View className="mb-4">
+        {activePoint ? (
+          <View>
+            <Text className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+              {activePoint.label}
+            </Text>
+            <View className="flex-row items-center gap-4 mt-1">
+              <View className="flex-row items-center gap-1.5">
+                <View className="w-2 h-2 rounded-full bg-emerald-500" />
+                <Text className="text-lg font-bold text-text-primary">
+                  +{formatCompact(activePoint.credit)}
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1.5">
+                <View className="w-2 h-2 rounded-full bg-rose-500" />
+                <Text className="text-lg font-bold text-text-primary">
+                  -{formatCompact(activePoint.debit)}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View>
+            <Text className="text-lg font-bold text-text-primary">{title}</Text>
+            <View className="flex-row items-center gap-3 mt-1">
+              <View className="flex-row items-center gap-1.5">
+                <View className="w-2 h-2 rounded-full bg-emerald-500" />
+                <Text className="text-xs text-text-secondary">Income</Text>
+              </View>
+              <View className="flex-row items-center gap-1.5">
+                <View className="w-2 h-2 rounded-full bg-rose-500" />
+                <Text className="text-xs text-text-secondary">Expense</Text>
+              </View>
+            </View>
+          </View>
+        )}
+      </View>
 
       {showCharts ? (
-        <View className="-ml-2">
+        <View className="-ml-3 relative" onTouchStart={() => setActivePoint(null)}>
           <VictoryChart
             width={chartWidth}
-            height={240}
-            domainPadding={{ x: 18, y: 16 }}
-            padding={{ top: 30, bottom: 44, left: 56, right: 16 }}
+            height={220}
+            padding={{ top: 10, bottom: 40, left: 50, right: 20 }}
           >
-            <VictoryLegend
-              x={56}
-              y={0}
-              orientation="horizontal"
-              gutter={18}
-              style={{ labels: { fill: '#111827', fontSize: 11 } }}
-              data={[
-                { name: 'Credit', symbol: { fill: '#22c55e' } },
-                { name: 'Debit', symbol: { fill: '#ef4444' } },
-              ]}
-            />
+            <Defs>
+              <LinearGradient id="gradientCredit" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#10B981" stopOpacity={0.4} />
+                <Stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+              </LinearGradient>
+              <LinearGradient id="gradientDebit" x1="0%" y1="0%" x2="0%" y2="100%">
+                <Stop offset="0%" stopColor="#EF4444" stopOpacity={0.4} />
+                <Stop offset="100%" stopColor="#EF4444" stopOpacity={0} />
+              </LinearGradient>
+            </Defs>
 
             <VictoryAxis
               tickValues={tickValues}
               style={{
-                axis: { stroke: '#E5E7EB' },
-                tickLabels: { fill: '#6B7280', fontSize: 10 },
+                axis: { stroke: 'transparent' }, // Hide axis line
+                tickLabels: { fill: '#9CA3AF', fontSize: 10 },
                 grid: { stroke: 'transparent' },
               }}
             />
@@ -125,39 +167,63 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
               dependentAxis
               tickFormat={(t) => formatCompact(Number(t))}
               style={{
-                axis: { stroke: '#E5E7EB' },
-                tickLabels: { fill: '#6B7280', fontSize: 10 },
-                grid: { stroke: '#E5E7EB' },
+                axis: { stroke: 'transparent' },
+                tickLabels: { fill: '#9CA3AF', fontSize: 10, padding: 5 },
+                grid: { stroke: '#E5E7EB', strokeDasharray: '4, 4' }, // Keep grid lines, should be safe
               }}
             />
 
-            <VictoryGroup offset={12}>
-              <VictoryBar
+            <VictoryGroup style={{ data: { strokeWidth: 2 } }}>
+              <VictoryArea
                 data={safe.creditSeries}
+                interpolation="monotoneX"
+                animate={{ duration: 500, onLoad: { duration: 500 } }}
                 style={{
-                  data: { fill: '#22c55e' },
+                  data: { fill: 'url(#gradientCredit)', stroke: '#10B981' },
                 }}
-                cornerRadius={{ topLeft: 3, topRight: 3 }}
-                barWidth={8}
+                events={[{
+                  target: "data",
+                  eventHandlers: {
+                    onPressIn: (_evt, targetProps) => {
+                      const { datum } = targetProps;
+                      if (datum) {
+                        const original = safe.points.find(p => p.label === datum.x);
+                        if (original) setActivePoint(original);
+                      }
+                      return [];
+                    },
+                  }
+                }]}
               />
-              <VictoryBar
+              <VictoryArea
                 data={safe.debitSeries}
+                interpolation="monotoneX"
+                animate={{ duration: 500, onLoad: { duration: 500 } }}
                 style={{
-                  data: { fill: '#ef4444' },
+                  data: { fill: 'url(#gradientDebit)', stroke: '#EF4444' },
                 }}
-                cornerRadius={{ topLeft: 3, topRight: 3 }}
-                barWidth={8}
+                events={[{
+                  target: "data",
+                  eventHandlers: {
+                    onPressIn: (_evt, targetProps) => {
+                      const { datum } = targetProps;
+                      if (datum) {
+                        const original = safe.points.find(p => p.label === datum.x);
+                        if (original) setActivePoint(original);
+                      }
+                      return [];
+                    },
+                  }
+                }]}
               />
             </VictoryGroup>
+
+            {/* Optional: Add a highlight line for active point if needed, but Voronoi handles touch area well */}
           </VictoryChart>
         </View>
       ) : (
-        <Text className="text-caption text-text-secondary mt-2">
-          Chart unavailable on this device.
-        </Text>
+        <Text>Chart unavailable</Text>
       )}
-
-      <Text className="text-caption text-text-secondary">{safe.labels.length > 12 ? 'Tip: rotate to see more.' : ' '}</Text>
     </Card>
   );
 });
