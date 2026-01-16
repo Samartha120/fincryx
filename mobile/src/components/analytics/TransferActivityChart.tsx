@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { Platform, Text, useWindowDimensions, View } from 'react-native';
 import { Line } from 'react-native-svg';
-import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup } from 'victory-native';
+import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryLabel } from 'victory-native';
 
 import { Card } from '@/src/components/ui/Card';
 import type { Transaction } from '@/src/api/transactionsApi';
