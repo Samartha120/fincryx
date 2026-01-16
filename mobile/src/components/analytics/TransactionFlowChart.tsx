@@ -165,6 +165,7 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
               axisComponent={<Line />}
               gridComponent={<Line />}
               tickLabelComponent={<VictoryLabel />}
+              groupComponent={<G />}
             />
 
             <VictoryAxis
@@ -178,6 +179,7 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
               axisComponent={<Line />}
               gridComponent={<Line />}
               tickLabelComponent={<VictoryLabel />}
+              groupComponent={<G />}
             />
 
             <VictoryGroup style={{ data: { strokeWidth: 2 } }}>
