@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Platform, Text, useWindowDimensions, View } from 'react-native';
+import { G } from 'react-native-svg';
 import { VictoryPie } from 'victory-native';
 
 import type { Account } from '@/src/api/accountsApi';
@@ -131,6 +132,7 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
               padAngle={2}
               labels={() => null} // No labels on the pie itself, we use the legend
               animate={{ duration: 500 }}
+              groupComponent={<G />}
             />
           </View>
         ) : (

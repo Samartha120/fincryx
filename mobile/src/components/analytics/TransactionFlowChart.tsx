@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState } from 'react';
 import { Platform, Text, useWindowDimensions, View } from 'react-native';
-import { Defs, LinearGradient, Line, Stop } from 'react-native-svg';
+import { Defs, LinearGradient, Line, Stop, G } from 'react-native-svg';
 import { VictoryArea, VictoryAxis, VictoryChart, VictoryGroup, VictoryLabel } from 'victory-native';
 
 import type { TransactionAnalytics } from '@/src/api/analyticsApi';
@@ -142,6 +142,7 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
             width={chartWidth}
             height={220}
             padding={{ top: 10, bottom: 40, left: 50, right: 20 }}
+            groupComponent={<G />}
           >
             <Defs>
               <LinearGradient id="gradientCredit" x1="0%" y1="0%" x2="0%" y2="100%">
