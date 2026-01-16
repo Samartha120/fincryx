@@ -20,9 +20,24 @@ function addMonths(date, delta) {
   return d;
 }
 
+function addDays(date, delta) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + delta);
+  return d;
+}
+
 function startOfDay(date) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function startOfWeek(date) {
+  const d = startOfDay(date);
+  const day = d.getDay() || 7;
+  if (day !== 1) {
+    d.setDate(d.getDate() - (day - 1));
+  }
   return d;
 }
 
@@ -32,6 +47,15 @@ function fmtMonthLabel(date) {
 
 function fmtDayLabel(date) {
   return date.toLocaleString('en-US', { month: 'short', day: '2-digit' });
+}
+
+function fmtWeekLabel(date) {
+  const d = startOfDay(date);
+  return `Wk of ${d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}`;
+}
+
+function fmtYearLabel(date) {
+  return String(date.getFullYear());
 }
 
 function toMajor(amountMinor) {
