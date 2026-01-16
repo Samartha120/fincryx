@@ -6,6 +6,12 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup, VictoryLabel } fro
 import { Card } from '@/src/components/ui/Card';
 import type { Transaction } from '@/src/api/transactionsApi';
 
+// Wrapper to sanitize props for native Line component
+const SafeLine = (props: any) => {
+    const { pointerEvents, ...rest } = props;
+    return <Line {...rest} pointerEvents="none" />;
+};
+
 type Props = {
     transactions: Transaction[];
     loading?: boolean;
@@ -92,11 +98,7 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
                         padding={{ top: 10, bottom: 40, left: 50, right: 20 }}
                         groupComponent={<G />}
                     >
-// Wrapper to sanitize props for native Line component
-const SafeLine = (props: any) => {
-    const {pointerEvents, ...rest } = props;
-                        return <Line {...rest} pointerEvents="none" />;
-};
+
 
                         // ...
 
@@ -107,19 +109,21 @@ const SafeLine = (props: any) => {
                                 grid: { stroke: 'transparent' },
                             }}
                             axisComponent={<SafeLine />}
+                            tickComponent={<SafeLine />}
                             gridComponent={<SafeLine />}
                             tickLabelComponent={<VictoryLabel />}
                             groupComponent={<G />}
                         />
                         <VictoryAxis
                             dependentAxis
-                            tickFormat={(t) => `${(Number(t) / 1000).toFixed(0)}k`} // Very compact
+                            tickFormat={(t: any) => `${(Number(t) / 1000).toFixed(0)}k`} // Very compact
                             style={{
                                 axis: { stroke: 'transparent' },
                                 tickLabels: { fill: '#9CA3AF', fontSize: 10, padding: 5 },
                                 grid: { stroke: '#E5E7EB', strokeDasharray: '4, 4' },
                             }}
                             axisComponent={<SafeLine />}
+                            tickComponent={<SafeLine />}
                             gridComponent={<SafeLine />}
                             tickLabelComponent={<VictoryLabel />}
                             groupComponent={<G />}

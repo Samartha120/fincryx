@@ -14,6 +14,13 @@ type Props = {
   error?: string | null;
 };
 
+// Wrapper to sanitize props for native Line component
+const SafeLine = (props: any) => {
+  // Filter out invalid pointerEvents that Victory might pass
+  const { pointerEvents, ...rest } = props;
+  return <Line {...rest} pointerEvents="none" />;
+};
+
 function formatCompact(value: number): string {
   if (!Number.isFinite(value)) return '0';
   const abs = Math.abs(value);
@@ -155,14 +162,7 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
               </LinearGradient>
             </Defs>
 
-// ... imports
 
-// Wrapper to sanitize props for native Line component
-const SafeLine = (props: any) => {
-  // Filter out invalid pointerEvents that Victory might pass
-  const {pointerEvents, ...rest } = props;
-            return <Line {...rest} pointerEvents="none" />;
-};
 
             // ... type Props ...
 
@@ -176,6 +176,7 @@ const SafeLine = (props: any) => {
                 grid: { stroke: 'transparent' },
               }}
               axisComponent={<SafeLine />}
+              tickComponent={<SafeLine />}
               gridComponent={<SafeLine />}
               tickLabelComponent={<VictoryLabel />}
               groupComponent={<G />}
@@ -183,13 +184,14 @@ const SafeLine = (props: any) => {
 
             <VictoryAxis
               dependentAxis
-              tickFormat={(t) => formatCompact(Number(t))}
+              tickFormat={(t: any) => formatCompact(Number(t))}
               style={{
                 axis: { stroke: 'transparent' },
                 tickLabels: { fill: '#9CA3AF', fontSize: 10, padding: 5 },
                 grid: { stroke: '#E5E7EB', strokeDasharray: '4, 4' }, // Keep grid lines, should be safe
               }}
               axisComponent={<SafeLine />}
+              tickComponent={<SafeLine />}
               gridComponent={<SafeLine />}
               tickLabelComponent={<VictoryLabel />}
               groupComponent={<G />}

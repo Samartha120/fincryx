@@ -100,7 +100,12 @@ function RootLayoutNav() {
   return (
     <SafeAreaProvider>
       <ThemeProvider value={effectiveScheme === 'dark' ? CustomDarkTheme : CustomDefaultTheme}>
-        <StatusBar style={effectiveScheme === 'dark' ? 'light' : 'dark'} key={effectiveScheme} />
+        <StatusBar
+          style={effectiveScheme === 'dark' ? 'light' : 'dark'}
+          key={effectiveScheme}
+          translucent
+          backgroundColor="transparent"
+        />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)" />
