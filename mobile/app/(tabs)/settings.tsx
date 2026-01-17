@@ -1,6 +1,42 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as LocalAuthentication from 'expo-local-authentication';
+import { SafeLocalAuthentication, isBiometricsAvailable } from '@/src/utils/biometrics';
+
+// ... (inside component)
+
+// Handle Biometric Toggle
+const toggleBiometric = async (value: boolean) => {
+  try {
+    if (value) {
+      // Double check availability
+      if (!isBiometricsAvailable) {
+        Alert.alert('Error', 'Biometric module is not loaded.');
+        return;
+      }
+
+      const hasHardware = await SafeLocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await SafeLocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        Alert.alert('Not Available', 'Biometric authentication is not available or not set up on this device.');
+        return;
+      }
+
+      const result = await SafeLocalAuthentication.authenticateAsync({
+        promptMessage: 'Authenticate to enable biometric lock',
+      });
+
+      if (result.success) {
+        setBiometricEnabled(true);
+      }
+    } else {
+      setBiometricEnabled(false);
+    }
+  } catch (error) {
+    console.error('Biometric error:', error);
+    Alert.alert('Error', 'Biometric authentication failed. Please try restarting the app.');
+  }
+};
 import { useColorScheme } from 'nativewind';
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Switch, Text, View } from 'react-native';
