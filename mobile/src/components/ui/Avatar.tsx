@@ -5,7 +5,7 @@ import { cn } from '@/src/lib/cn';
 
 type Props = {
   name?: string | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 };
 
@@ -23,6 +23,7 @@ export function Avatar({ name, size = 'md', className }: Props) {
     sm: { wrapper: 'h-9 w-9', text: 'text-label' },
     md: { wrapper: 'h-11 w-11', text: 'text-body' },
     lg: { wrapper: 'h-14 w-14', text: 'text-heading' },
+    xl: { wrapper: 'h-24 w-24', text: 'text-3xl' },
   };
 
   return (

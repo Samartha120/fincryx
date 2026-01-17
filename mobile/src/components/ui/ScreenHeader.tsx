@@ -1,6 +1,7 @@
 import { useColorScheme } from 'nativewind';
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 import { cn } from '@/src/lib/cn';
 
@@ -11,14 +12,22 @@ type Props = {
   className?: string;
 };
 
-export function ScreenHeader({ title, subtitle, loading, className }: Props) {
+export function ScreenHeader({ title, subtitle, loading, className, onBack }: { title: string; subtitle?: string; loading?: boolean; className?: string; onBack?: () => void }) {
   const { colorScheme } = useColorScheme();
   const spinnerColor = colorScheme === 'dark' ? '#6D8CFF' : '#1E40AF';
+  const textColor = colorScheme === 'dark' ? '#EAF0FF' : '#111827';
 
   return (
     <View className={cn('gap-1', className)}>
       <View className="flex-row items-center justify-between">
-        <Text className="text-title text-text-primary">{title}</Text>
+        <View className="flex-row items-center gap-3">
+          {onBack && (
+            <Pressable onPress={onBack} hitSlop={10}>
+              <FontAwesome name="arrow-left" size={20} color={textColor} />
+            </Pressable>
+          )}
+          <Text className="text-title text-text-primary">{title}</Text>
+        </View>
         {loading ? <ActivityIndicator color={spinnerColor} /> : null}
       </View>
       {subtitle ? <Text className="text-body text-text-secondary">{subtitle}</Text> : null}
