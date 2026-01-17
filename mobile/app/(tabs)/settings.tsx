@@ -111,24 +111,29 @@ export default function SettingsScreen() {
 
   // Handle Biometric Toggle
   const toggleBiometric = async (value: boolean) => {
-    if (value) {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    try {
+      if (value) {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
-      if (!hasHardware || !isEnrolled) {
-        Alert.alert('Not Available', 'Biometric authentication is not available or not set up on this device.');
-        return;
+        if (!hasHardware || !isEnrolled) {
+          Alert.alert('Not Available', 'Biometric authentication is not available or not set up on this device.');
+          return;
+        }
+
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Authenticate to enable biometric lock',
+        });
+
+        if (result.success) {
+          setBiometricEnabled(true);
+        }
+      } else {
+        setBiometricEnabled(false);
       }
-
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to enable biometric lock',
-      });
-
-      if (result.success) {
-        setBiometricEnabled(true);
-      }
-    } else {
-      setBiometricEnabled(false);
+    } catch (error) {
+      console.error('Biometric error:', error);
+      Alert.alert('Error', 'Biometric authentication failed to initialize. Please try restarting the app.');
     }
   };
 
