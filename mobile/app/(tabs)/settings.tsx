@@ -4,15 +4,11 @@ import { useColorScheme } from 'nativewind';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Appearance, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 
-import { getAccounts, type Account } from '@/src/api/accountsApi';
 import { AnimatedIn } from '@/src/components/ui/AnimatedIn';
 import { Avatar } from '@/src/components/ui/Avatar';
-import { Button } from '@/src/components/ui/Button';
-import { CardContainer } from '@/src/components/ui/CardContainer';
 import { Screen } from '@/src/components/ui/Screen';
 import { ScreenHeader } from '@/src/components/ui/ScreenHeader';
 import { ScreenTransition } from '@/src/components/ui/ScreenTransition';
-import { formatMoneyMinor } from '@/src/lib/money';
 import { useAuthStore } from '@/src/store/useAuthStore';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 
