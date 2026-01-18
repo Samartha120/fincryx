@@ -15,11 +15,11 @@ try {
 // Mock CameraView component for fallback
 const MockCameraView = (props: any) => {
     return (
-        <View style= { [styles.container, props.style]} >
-        <Text style={ styles.text }>
-            Camera unavailable.{ '\n' }Native module not found.
+        <View style={[styles.container, props.style]}>
+            <Text style={styles.text}>
+                Camera unavailable.{'\n'}Native module not found.
             </Text>
-                </View>
+        </View>
     );
 };
 

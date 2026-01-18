@@ -1,0 +1,3 @@
+src/components/ui/Input.tsx(23,17): error TS2339: Property 'className' does not exist on type '{ allowFontScaling?: boolean | undefined; autoCapitalize?: "none" | "sentences" | "words" | "characters" | undefined; autoComplete?: "url" | "off" | "additional-name" | "address-line1" | ... 53 more ... | undefined; ... 156 more ...; verticalAlign?: "auto" | ... 3 more ... | undefined; }'.
+src/lib/pushNotifications.ts(9,37): error TS2322: Type 'Promise<{ shouldShowAlert: true; shouldPlaySound: true; shouldSetBadge: false; }>' is not assignable to type 'Promise<NotificationBehavior>'.
+  Type '{ shouldShowAlert: true; shouldPlaySound: true; shouldSetBadge: false; }' is missing the following properties from type 'NotificationBehavior': shouldShowBanner, shouldShowList

@@ -19,8 +19,7 @@ export function Input({ label, error, className, ...props }: Props) {
         placeholderTextColor="#9CA3AF"
         className={cn(
           'h-14 rounded-input border px-4 text-body text-text-primary bg-surface',
-          error ? 'border-error' : isFocused ? 'border-primary' : 'border-border',
-          props.className
+          error ? 'border-error' : isFocused ? 'border-primary' : 'border-border'
         )}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
