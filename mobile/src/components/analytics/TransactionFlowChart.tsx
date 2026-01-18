@@ -49,9 +49,10 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
     }
 
     const pointsCount = safe.points.length;
-    const horizontalPadding = 12;
+    // Increase padding to prevent clipping at edges
+    const horizontalPadding = 16;
     const usableWidth = chartWidthPx - horizontalPadding * 2;
-    const verticalPadding = 16;
+    const verticalPadding = 24; // More vertical space for dots
     const usableHeight = chartHeight - verticalPadding * 2;
     const step = pointsCount > 1 ? usableWidth / (pointsCount - 1) : 0;
 
@@ -94,30 +95,60 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
   if (!safe.hasData) {
     return (
       <Card className="gap-2 items-center justify-center py-12">
+        <Text className="text-4xl mb-3">📊</Text>
         <Text className="text-label text-text-secondary">No transaction history available.</Text>
       </Card>
     );
   }
 
   return (
-    <Card className="overflow-visible pb-2">
-      <View className="mb-4">
+    <Card className="overflow-hidden pb-4">
+      <View className="mb-4 flex-row justify-between items-start">
         <View>
           <Text className="text-lg font-bold text-text-primary">{title}</Text>
-          <View className="flex-row items-center gap-3 mt-1">
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-2 h-2 rounded-full bg-emerald-500" />
-              <Text className="text-xs text-text-secondary">Income</Text>
+        </View>
+        <View className="flex-row items-center gap-4">
+          {/* Income Legend & Trend */}
+          <View className="items-end">
+            <View className="flex-row items-center gap-2">
+              <View className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
+              <Text className="text-xs font-medium text-text-secondary">Income</Text>
             </View>
-            <View className="flex-row items-center gap-1.5">
-              <View className="w-2 h-2 rounded-full bg-rose-500" />
-              <Text className="text-xs text-text-secondary">Expense</Text>
+            {safe.hasData && safe.points.length >= 2 && (
+              <Text className="text-[10px] font-bold text-emerald-600 mt-0.5">
+                {(() => {
+                  const curr = safe.points[safe.points.length - 1].credit;
+                  const prev = safe.points[safe.points.length - 2].credit;
+                  if (prev === 0) return curr > 0 ? '▲ 100%' : '0%';
+                  const pct = ((curr - prev) / prev) * 100;
+                  return `${pct > 0 ? '▲' : '▼'} ${Math.abs(Math.round(pct))}%`;
+                })()}
+              </Text>
+            )}
+          </View>
+
+          {/* Expense Legend & Trend */}
+          <View className="items-end">
+            <View className="flex-row items-center gap-2">
+              <View className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm" />
+              <Text className="text-xs font-medium text-text-secondary">Expense</Text>
             </View>
+            {safe.hasData && safe.points.length >= 2 && (
+              <Text className="text-[10px] font-bold text-rose-600 mt-0.5">
+                {(() => {
+                  const curr = safe.points[safe.points.length - 1].debit;
+                  const prev = safe.points[safe.points.length - 2].debit;
+                  if (prev === 0) return curr > 0 ? '▲ 100%' : '0%';
+                  const pct = ((curr - prev) / prev) * 100;
+                  return `${pct > 0 ? '▲' : '▼'} ${Math.abs(Math.round(pct))}%`;
+                })()}
+              </Text>
+            )}
           </View>
         </View>
       </View>
 
-      <View style={{ width: chartWidth }} className="mt-2">
+      <View className="mt-2 w-full">
         <View
           style={{ height: chartHeight }}
           className="w-full"

@@ -59,19 +59,15 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
 
   return (
     <Card>
-      <View className="flex-row justify-between items-center mb-4">
-        <View>
-          <Text className="text-label text-text-primary font-semibold">Transfers</Text>
-          <Text className="text-caption text-text-secondary">Sent vs Received</Text>
-        </View>
-        <View className="flex-row gap-3">
-          <View className="flex-row items-center gap-1">
-            <View className="w-2 h-2 rounded-full bg-blue-500" />
-            <Text className="text-xs text-text-secondary">Sent</Text>
+      <View className="flex-row justify-end items-center mb-4">
+        <View className="flex-row gap-4">
+          <View className="flex-row items-center gap-2">
+            <View className="w-3 h-3 rounded-full bg-blue-500 shadow-sm" />
+            <Text className="text-xs font-medium text-text-primary">Sent</Text>
           </View>
-          <View className="flex-row items-center gap-1">
-            <View className="w-2 h-2 rounded-full bg-purple-500" />
-            <Text className="text-xs text-text-secondary">Received</Text>
+          <View className="flex-row items-center gap-2">
+            <View className="w-3 h-3 rounded-full bg-purple-500 shadow-sm" />
+            <Text className="text-xs font-medium text-text-primary">Received</Text>
           </View>
         </View>
       </View>
@@ -98,8 +94,9 @@ export const TransferActivityChart = memo(function TransferActivityChart({ trans
           </View>
         </View>
       ) : (
-        <View className="h-32 items-center justify-center">
-          <Text className="text-text-secondary">No recent transfer activity</Text>
+        <View className="py-8 items-center justify-center gap-2">
+          <Text className="text-3xl text-text-tertiary">⇆</Text>
+          <Text className="text-text-secondary font-medium">No recent transfer activity</Text>
         </View>
       )}
     </Card>

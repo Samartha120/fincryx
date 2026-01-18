@@ -73,15 +73,16 @@ export const LoanOverviewChart = memo(function LoanOverviewChart({
   if (!safe.hasData) {
     return (
       <Card className="gap-2 items-center justify-center py-6">
-        <Text className="text-label text-text-secondary">No active loans.</Text>
+        <Text className="text-4xl mb-3">🎉</Text>
+        <Text className="text-label text-text-secondary font-medium">Debt Free!</Text>
+        <Text className="text-caption text-text-tertiary">No active loans found.</Text>
       </Card>
     );
   }
 
   return (
     <Card>
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-label text-text-primary font-semibold">{title}</Text>
+      <View className="flex-row justify-end items-center mb-4">
         <View className="px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30">
           <Text className="text-xs font-bold text-blue-600 dark:text-blue-400">{safe.paidPct}% Paid</Text>
         </View>

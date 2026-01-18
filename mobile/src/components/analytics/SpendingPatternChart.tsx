@@ -76,6 +76,7 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
   if (!safe.hasData) {
     return (
       <Card className="gap-2 items-center justify-center py-8">
+        <Text className="text-4xl mb-3">🏷️</Text>
         <Text className="text-label text-text-secondary">No spending data available.</Text>
       </Card>
     );
@@ -83,10 +84,7 @@ export const SpendingPatternChart = memo(function SpendingPatternChart({
 
   return (
     <Card>
-      <View className="mb-4">
-        <Text className="text-label text-text-primary font-semibold">{title}</Text>
-        <Text className="text-caption text-text-secondary">Breakdown by category</Text>
-      </View>
+      <View className="mb-2" />
 
       <View className="flex-row items-center justify-between">
         <View className="flex-1 gap-3 mr-4">
