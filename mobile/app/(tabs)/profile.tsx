@@ -17,10 +17,11 @@ export default function ProfileScreen() {
   const fields: ProfileField[] = [
     { label: 'Full name', value: user?.fullName ?? 'Not provided' },
     { label: 'Email', value: user?.email ?? 'Not provided' },
-    { label: 'About', value: 'Finoryx customer' },
-    { label: 'Location', value: 'Not provided' },
-    { label: 'Contact number', value: 'Not provided' },
-    { label: 'Date of birth', value: 'Not provided' },
+    { label: 'Account Number', value: '**** **** 1234' },
+    { label: 'KYC Status', value: 'Verified' },
+    { label: 'Phone Number', value: '+1 (555) 000-0000' },
+    { label: 'Address', value: '123 Fintech Avenue, NY' },
+    { label: 'Citizenship', value: 'United States' },
   ];
 
   return (

@@ -1,21 +1,32 @@
-import { CameraView, useCameraPermissions, isCameraAvailable } from '@/src/utils/camera';
+import { CameraView, useCameraPermissions } from '@/src/utils/camera';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '@/src/components/ui/Avatar';
 import { PrimaryButton } from '@/src/components/ui/PrimaryButton';
 import { Screen } from '@/src/components/ui/Screen';
 import { ScreenHeader } from '@/src/components/ui/ScreenHeader';
+import { useAuthStore } from '@/src/store/useAuthStore';
 
 export default function QRScannerScreen() {
     const router = useRouter();
+    const { user } = useAuthStore();
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [scannedData, setScannedData] = useState<string | null>(null);
 
+    const profile = useMemo(
+        () => ({
+            name: user?.fullName || 'Finoryx customer',
+            email: user?.email || 'email@example.com',
+            role: user?.role || 'Customer',
+            id: user?.id || 'Not assigned',
+        }),
+        [user],
+    );
+
     if (!permission) {
-        // Camera permissions are still loading.
         return <View />;
     }
 
@@ -33,11 +44,10 @@ export default function QRScannerScreen() {
     const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
         setScanned(true);
         setScannedData(data);
-        // In a real app, you'd fetch user details here based on 'data'
     };
 
     return (
-        <Screen edges={['top', 'left', 'right']} className="bg-black">
+        <Screen edges={['top', 'left', 'right']} className={scanned ? 'bg-background' : 'bg-black'}>
             <View className="absolute top-10 left-4 z-50">
                 <ScreenHeader title="" onBack={() => router.back()} />
             </View>
@@ -48,7 +58,7 @@ export default function QRScannerScreen() {
                         style={StyleSheet.absoluteFillObject}
                         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
                         barcodeScannerSettings={{
-                            barcodeTypes: ["qr"],
+                            barcodeTypes: ['qr'],
                         }}
                     />
                     <View style={styles.overlay}>
@@ -67,9 +77,18 @@ export default function QRScannerScreen() {
             ) : (
                 <View className="flex-1 items-center justify-center bg-background px-md">
                     <View className="bg-surface w-full p-6 rounded-3xl items-center shadow-lg border border-border/50">
-                        <Avatar name="Scanned User" size="xl" />
-                        <Text className="text-xl font-bold text-text-primary mt-4">Scanned User</Text>
-                        <Text className="text-body text-text-secondary mb-6">{scannedData || 'ID: 12345'}</Text>
+                        <Avatar name={profile.name} size="xl" />
+                        <Text className="text-xl font-bold text-text-primary mt-4">{profile.name}</Text>
+                        <Text className="text-body text-text-secondary mt-1">{profile.email}</Text>
+                        <Text className="text-caption text-text-secondary/80 mb-4 mt-1">
+                            ID: {profile.id}
+                        </Text>
+
+                        {scannedData && (
+                            <Text className="text-caption text-text-secondary mb-4">
+                                QR data: {scannedData}
+                            </Text>
+                        )}
 
                         <View className="w-full gap-3">
                             <PrimaryButton

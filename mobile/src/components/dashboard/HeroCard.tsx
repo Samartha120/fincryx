@@ -13,7 +13,7 @@ interface HeroCardProps {
 
 export function HeroCard({ totalBalanceMinor, currency, accountType = 'Total Balance', style }: HeroCardProps) {
     return (
-        <View style={style} className="shadow-lg shadow-blue-900/20">
+        <View style={style} className="shadow-lg shadow-blue-900/20 rounded-3xl">
             <LinearGradient
                 colors={['#1E40AF', '#3B82F6']} // Deep blue to lighter blue
                 start={{ x: 0, y: 0 }}

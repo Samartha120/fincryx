@@ -1,33 +1,28 @@
-// Safe wrapper for expo-camera
-// This prevents the app from crashing if the native module is missing
+// Standard export for expo-camera logic
+// This assumes expo-camera is correctly installed and linked.
+// If running in Expo Go or Development Client, ensure the camera permission plugin is configured (it is).
 
+import { CameraView as ExpoCameraView, useCameraPermissions as useExpoCameraPermissions, type CameraViewProps } from 'expo-camera';
 import React from 'react';
-import { View, Text } from 'react-native';
+import { Text, View } from 'react-native';
 
-let CameraPackage: any = null;
+// Re-export hook
+export const useCameraPermissions = useExpoCameraPermissions;
 
-try {
-    CameraPackage = require('expo-camera');
-} catch (error) {
-    console.warn('expo-camera module not found or failed to load:', error);
+// Export CameraView safely? 
+// We will export it directly. If it fails, it means the native module is legitimately missing.
+// However, to keep the app from crashing entirely on import (rare in Expo), we export directly.
+// The previous "require" strategy is good for optional modules but Camera is core here.
+
+export const CameraView = ExpoCameraView;
+
+// Helper to check availability (always true if installed, but permission is separate)
+export const isCameraAvailable = true;
+
+// If you really need a mock for web/simulator where camera might be missing:
+/*
+export const CameraView = (props: CameraViewProps) => {
+    if (!ExpoCameraView) return <View><Text>Camera module missing</Text></View>;
+    return <ExpoCameraView {...props} />;
 }
-
-// Mock CameraView component
-// Using React.createElement to allow this file to remain .ts without JSX errors
-const MockCameraView = (props: any) => {
-    return React.createElement(View, {
-        style: [{ backgroundColor: 'black', alignItems: 'center', justifyContent: 'center' }, props.style]
-    },
-        React.createElement(Text, { style: { color: 'white', padding: 20, textAlign: 'center' } },
-            "Camera Not Available - Native Module Missing"
-        )
-    );
-};
-
-// Exports
-export const CameraView = CameraPackage?.CameraView || MockCameraView;
-export const useCameraPermissions = CameraPackage?.useCameraPermissions || (() => [
-    { granted: false, status: 'denied', canAskAgain: false, expires: 'never' },
-    async () => ({ granted: false, status: 'denied', canAskAgain: false, expires: 'never' })
-]);
-export const isCameraAvailable = !!CameraPackage;
+*/

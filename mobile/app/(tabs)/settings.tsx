@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { SafeLocalAuthentication, isBiometricsAvailable } from '@/src/utils/biometrics';
+import { SafeLocalAuthentication } from '@/src/utils/biometrics';
 import { useColorScheme } from 'nativewind';
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Switch, Text, View } from 'react-native';
@@ -113,32 +113,33 @@ export default function SettingsScreen() {
   const toggleBiometric = async (value: boolean) => {
     try {
       if (value) {
-        if (!isBiometricsAvailable) {
-          Alert.alert('Error', 'Biometric module is not loaded.');
-          return;
-        }
-
-        const hasHardware = await SafeLocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await SafeLocalAuthentication.isEnrolledAsync();
-
-        if (!hasHardware || !isEnrolled) {
-          Alert.alert('Not Available', 'Biometric authentication is not available or not set up on this device.');
-          return;
-        }
-
         const result = await SafeLocalAuthentication.authenticateAsync({
           promptMessage: 'Authenticate to enable biometric lock',
+          cancelLabel: 'Cancel',
         });
 
-        if (result.success) {
+        if (result?.success) {
           setBiometricEnabled(true);
+          return;
         }
+
+        if (result?.error === 'user_cancel' || result?.error === 'system_cancel') {
+          return;
+        }
+
+        Alert.alert(
+          'Biometric not available',
+          'Please make sure fingerprint or face unlock is set up on this device and try again.',
+        );
       } else {
         setBiometricEnabled(false);
       }
     } catch (error) {
       console.error('Biometric error:', error);
-      Alert.alert('Error', 'Biometric authentication failed. Please try restarting the app.');
+      Alert.alert(
+        'Authentication error',
+        'Biometric authentication is not available or failed on this device.',
+      );
     }
   };
 
@@ -196,10 +197,19 @@ export default function SettingsScreen() {
                 icon="bell-o"
                 iconColor="#F59E0B"
                 title="Notifications"
+                onPress={() => router.push('/(tabs)/notifications')}
                 rightElement={
                   <Switch
                     value={notificationsEnabled}
-                    onValueChange={(v) => void setNotificationsEnabled(v)}
+                    onValueChange={async (v) => {
+                      await setNotificationsEnabled(v);
+                      if (v) {
+                        Alert.alert(
+                          'Notifications enabled',
+                          'You will get alerts about transfers, payments, loans and important account activity.',
+                        );
+                      }
+                    }}
                     thumbColor="#FFFFFF"
                     trackColor={{ false: '#374151', true: '#3B82F6' }}
                   />
