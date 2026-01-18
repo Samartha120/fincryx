@@ -5,12 +5,19 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 let CameraPackage: any = null;
+let cameraError: any = null;
 
 try {
     CameraPackage = require('expo-camera');
 } catch (error) {
     console.warn('expo-camera module not found or failed to load:', error);
+    cameraError = error;
 }
+
+// Export a flag to let consumers know if the real camera is available
+export const isCameraMock = !CameraPackage;
+export const initializationError = cameraError;
+
 
 // Mock CameraView component for fallback
 const MockCameraView = (props: any) => {

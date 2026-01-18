@@ -10,9 +10,11 @@ type Props = {
   subtitle?: string;
   loading?: boolean;
   className?: string;
+  onBack?: () => void;
+  rightElement?: React.ReactNode;
 };
 
-export function ScreenHeader({ title, subtitle, loading, className, onBack }: { title: string; subtitle?: string; loading?: boolean; className?: string; onBack?: () => void }) {
+export function ScreenHeader({ title, subtitle, loading, className, onBack, rightElement }: Props) {
   const { colorScheme } = useColorScheme();
   const spinnerColor = colorScheme === 'dark' ? '#6D8CFF' : '#1E40AF';
   const textColor = colorScheme === 'dark' ? '#EAF0FF' : '#111827';
@@ -28,7 +30,10 @@ export function ScreenHeader({ title, subtitle, loading, className, onBack }: { 
           )}
           <Text className="text-title text-text-primary">{title}</Text>
         </View>
-        {loading ? <ActivityIndicator color={spinnerColor} /> : null}
+        <View className="flex-row items-center gap-3">
+          {loading ? <ActivityIndicator color={spinnerColor} /> : null}
+          {rightElement}
+        </View>
       </View>
       {subtitle ? <Text className="text-body text-text-secondary">{subtitle}</Text> : null}
     </View>

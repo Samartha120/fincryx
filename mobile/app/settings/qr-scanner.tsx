@@ -1,4 +1,4 @@
-import { CameraView, useCameraPermissions } from '@/src/utils/camera';
+import { CameraView, useCameraPermissions, isCameraMock, initializationError } from '@/src/utils/camera';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -14,99 +14,115 @@ export default function QRScannerScreen() {
     const { user } = useAuthStore();
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
-    const [scannedData, setScannedData] = useState<string | null>(null);
 
-    const profile = useMemo(
-        () => ({
-            name: user?.fullName || 'Finoryx customer',
-            email: user?.email || 'email@example.com',
-            role: user?.role || 'Customer',
-            id: user?.id || 'Not assigned',
-        }),
-        [user],
-    );
+    // Explicitly handle loading state for permissions
+    const isLoadingPermission = !permission;
 
-    if (!permission) {
-        return <View />;
-    }
-
-    if (!permission.granted) {
+    // Handle missing native module (Mock Mode)
+    if (isCameraMock) {
         return (
-            <Screen edges={['top', 'left', 'right']} className="bg-background-subtle items-center justify-center p-md">
-                <Text className="text-center text-text-primary text-lg font-bold mb-4">
-                    We need your permission to show the camera
-                </Text>
-                <PrimaryButton onPress={requestPermission} title="Grant Permission" />
+            <Screen edges={['top', 'left', 'right']} className="bg-background items-center justify-center p-md">
+                <View className="absolute top-10 left-4 z-50">
+                    <ScreenHeader title="" onBack={() => router.back()} />
+                </View>
+                <View className="items-center justify-center gap-4">
+                    <Text className="text-5xl">⚠️</Text>
+                    <Text className="text-center text-text-primary text-heading font-bold">
+                        Camera Unavailable
+                    </Text>
+                    <Text className="text-center text-text-secondary">
+                        The native camera module could not be loaded. This text confirms the 'Mock' fallback is active.
+                    </Text>
+                    <View className="bg-error/10 p-3 rounded-lg w-full">
+                        <Text className="text-error font-mono text-xs text-center">
+                            Error: {initializationError?.message || String(initializationError)}
+                        </Text>
+                    </View>
+                    <Text className="text-center text-text-secondary text-caption bg-surface p-2 rounded border border-border">
+                        Possible cause: Expo Go version mismatch or missing Development Build.
+                    </Text>
+
+                    <View className="w-full gap-3 mt-4">
+                        <PrimaryButton
+                            title="Simulate Scan (Debug)"
+                            onPress={() => handleBarCodeScanned({ type: 'qr', data: 'Simulated User ID' })}
+                        />
+                        <PrimaryButton
+                            variant="secondary"
+                            onPress={() => router.back()}
+                            title="Go Back"
+                        />
+                    </View>
+                </View>
             </Screen>
         );
     }
 
     const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+        if (scanned) return;
         setScanned(true);
-        setScannedData(data);
+        // Navigate to profile with the scanned data (or just navigate if that's the requirement)
+        // Ideally we would pass data, but for now we link to Profile as requested.
+        router.push('/(tabs)/profile');
     };
 
+    if (isLoadingPermission) {
+        return (
+            <Screen edges={['top', 'left', 'right']} className="items-center justify-center">
+                <Text className="text-text-secondary">Requesting camera permission...</Text>
+            </Screen>
+        );
+    }
+
+    if (!permission.granted) {
+        return (
+            <Screen edges={['top', 'left', 'right']} className="bg-background items-center justify-center p-md">
+                <Text className="text-center text-text-primary text-heading font-bold mb-2">
+                    Camera Access Needed
+                </Text>
+                <Text className="text-center text-text-secondary mb-6">
+                    To scan QR codes and verify your profile, please allow camera access.
+                </Text>
+                <PrimaryButton onPress={requestPermission} title="Grant Permission" />
+                <View className="mt-4">
+                    <PrimaryButton variant="secondary" onPress={() => router.back()} title="Cancel" />
+                </View>
+            </Screen>
+        );
+    }
+
     return (
-        <Screen edges={['top', 'left', 'right']} className={scanned ? 'bg-background' : 'bg-black'}>
+        <Screen edges={['top', 'left', 'right']} className="bg-black">
             <View className="absolute top-10 left-4 z-50">
                 <ScreenHeader title="" onBack={() => router.back()} />
             </View>
 
-            {!scanned ? (
-                <View style={styles.container}>
-                    <CameraView
-                        style={StyleSheet.absoluteFillObject}
-                        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-                        barcodeScannerSettings={{
-                            barcodeTypes: ['qr'],
-                        }}
-                    />
-                    <View style={styles.overlay}>
+            <View style={styles.container}>
+                <CameraView
+                    style={StyleSheet.absoluteFillObject}
+                    onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+                    barcodeScannerSettings={{
+                        barcodeTypes: ['qr'],
+                    }}
+                />
+                <View style={styles.overlay}>
+                    <View style={styles.unfocusedContainer}></View>
+                    <View style={styles.middleContainer}>
                         <View style={styles.unfocusedContainer}></View>
-                        <View style={styles.middleContainer}>
-                            <View style={styles.unfocusedContainer}></View>
-                            <View style={styles.focusedContainer}></View>
-                            <View style={styles.unfocusedContainer}></View>
-                        </View>
+                        <View style={styles.focusedContainer}></View>
                         <View style={styles.unfocusedContainer}></View>
                     </View>
-                    <Text className="absolute bottom-20 self-center text-white text-base font-medium bg-black/50 px-4 py-2 rounded-full overflow-hidden">
-                        Scan a Profile QR Code
-                    </Text>
+                    <View style={styles.unfocusedContainer}></View>
                 </View>
-            ) : (
-                <View className="flex-1 items-center justify-center bg-background px-md">
-                    <View className="bg-surface w-full p-6 rounded-3xl items-center shadow-lg border border-border/50">
-                        <Avatar name={profile.name} size="xl" />
-                        <Text className="text-xl font-bold text-text-primary mt-4">{profile.name}</Text>
-                        <Text className="text-body text-text-secondary mt-1">{profile.email}</Text>
-                        <Text className="text-caption text-text-secondary/80 mb-4 mt-1">
-                            ID: {profile.id}
+
+                <View className="absolute bottom-20 self-center items-center gap-4">
+                    <View className="bg-black/60 px-6 py-3 rounded-full overflow-hidden border border-white/20">
+                        <Text className="text-white text-base font-medium">
+                            Scan a Profile QR Code
                         </Text>
-
-                        {scannedData && (
-                            <Text className="text-caption text-text-secondary mb-4">
-                                QR data: {scannedData}
-                            </Text>
-                        )}
-
-                        <View className="w-full gap-3">
-                            <PrimaryButton
-                                title="Send Money"
-                                onPress={() => router.push('/(tabs)/transfer')}
-                            />
-                            <PrimaryButton
-                                title="Scan Again"
-                                variant="secondary"
-                                onPress={() => {
-                                    setScanned(false);
-                                    setScannedData(null);
-                                }}
-                            />
-                        </View>
                     </View>
                 </View>
-            )}
+            </View>
         </Screen>
     );
 }
