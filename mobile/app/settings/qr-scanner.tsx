@@ -18,6 +18,13 @@ export default function QRScannerScreen() {
     // Explicitly handle loading state for permissions
     const isLoadingPermission = !permission;
 
+    const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+        if (scanned) return;
+        setScanned(true);
+        // Navigate to the PUBLIC profile of the scanned user ID
+        router.push(`/user/${data}` as any);
+    };
+
     // Handle missing native module (Mock Mode)
     if (isCameraMock) {
         return (
@@ -44,7 +51,7 @@ export default function QRScannerScreen() {
 
                     <View className="w-full gap-3 mt-4">
                         <PrimaryButton
-                            title="Simulate Scan (Debug)"
+                            title="Simulate Scan (Jane Doe)"
                             onPress={() => handleBarCodeScanned({ type: 'qr', data: 'Simulated User ID' })}
                         />
                         <PrimaryButton
@@ -58,13 +65,7 @@ export default function QRScannerScreen() {
         );
     }
 
-    const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-        if (scanned) return;
-        setScanned(true);
-        // Navigate to profile with the scanned data (or just navigate if that's the requirement)
-        // Ideally we would pass data, but for now we link to Profile as requested.
-        router.push('/(tabs)/profile');
-    };
+
 
     if (isLoadingPermission) {
         return (
