@@ -40,32 +40,6 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
     };
   }, [data]);
 
-  if (loading) {
-    return (
-      <Card className="gap-3">
-        <View className="h-4 w-40 rounded bg-border-light animate-pulse" />
-        <View className="h-56 w-full rounded-lg bg-gray-100 dark:bg-neutral-800 animate-pulse" />
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="gap-2 border-error/20 bg-error/5">
-        <Text className="text-label text-error font-semibold">{title}</Text>
-        <Text className="text-caption text-error">{error}</Text>
-      </Card>
-    );
-  }
-
-  if (!safe.hasData) {
-    return (
-      <Card className="gap-2 items-center justify-center py-12">
-        <Text className="text-label text-text-secondary">No transaction history available.</Text>
-      </Card>
-    );
-  }
-
   const maxVal =
     safe.points.reduce((max, p) => Math.max(max, p.credit, p.debit), 0) || 1;
 
@@ -98,6 +72,32 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
       expensePoints: makeSeriesPoints('debit'),
     };
   }, [safe, chartWidthPx, chartHeight, maxVal]);
+
+  if (loading) {
+    return (
+      <Card className="gap-3">
+        <View className="h-4 w-40 rounded bg-border-light animate-pulse" />
+        <View className="h-56 w-full rounded-lg bg-gray-100 dark:bg-neutral-800 animate-pulse" />
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="gap-2 border-error/20 bg-error/5">
+        <Text className="text-label text-error font-semibold">{title}</Text>
+        <Text className="text-caption text-error">{error}</Text>
+      </Card>
+    );
+  }
+
+  if (!safe.hasData) {
+    return (
+      <Card className="gap-2 items-center justify-center py-12">
+        <Text className="text-label text-text-secondary">No transaction history available.</Text>
+      </Card>
+    );
+  }
 
   return (
     <Card className="overflow-visible pb-2">

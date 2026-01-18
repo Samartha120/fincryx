@@ -1,13 +1,33 @@
-// Standard export for expo-local-authentication
-import * as LocalAuthentication from 'expo-local-authentication';
+// Safe wrapper for expo-local-authentication
+// This prevents the app from crashing if the native module is missing
 
-export const SafeLocalAuthentication = LocalAuthentication;
+let LocalAuthentication: any = null;
 
+try {
+    LocalAuthentication = require('expo-local-authentication');
+} catch (error) {
+    console.warn('expo-local-authentication module not found or failed to load:', error);
+}
+
+const mockLocalAuthentication = {
+    hasHardwareAsync: async () => false,
+    isEnrolledAsync: async () => false,
+    authenticateAsync: async () => ({ success: false, error: 'Module not found' }),
+    AuthenticationType: {
+        FINGERPRINT: 1,
+        FACIAL_RECOGNITION: 2,
+    }
+};
+
+// Export the real module or the mock
+export const SafeLocalAuthentication = LocalAuthentication || mockLocalAuthentication;
+
+// Helper to check if it's actually available
 export const isBiometricsAvailable = async () => {
+    if (!LocalAuthentication) return false;
     try {
         return await LocalAuthentication.hasHardwareAsync();
     } catch (e) {
-        console.warn('Biometrics check failed:', e);
         return false;
     }
 };

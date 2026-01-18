@@ -1,28 +1,49 @@
-// Standard export for expo-camera logic
-// This assumes expo-camera is correctly installed and linked.
-// If running in Expo Go or Development Client, ensure the camera permission plugin is configured (it is).
+// Safe wrapper for expo-camera
+// This prevents the app from crashing if the native module is missing (e.g. in Expo Go without the proper SDK match or a stale Dev Client).
 
-import { CameraView as ExpoCameraView, useCameraPermissions as useExpoCameraPermissions, type CameraViewProps } from 'expo-camera';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-// Re-export hook
-export const useCameraPermissions = useExpoCameraPermissions;
+let CameraPackage: any = null;
 
-// Export CameraView safely? 
-// We will export it directly. If it fails, it means the native module is legitimately missing.
-// However, to keep the app from crashing entirely on import (rare in Expo), we export directly.
-// The previous "require" strategy is good for optional modules but Camera is core here.
-
-export const CameraView = ExpoCameraView;
-
-// Helper to check availability (always true if installed, but permission is separate)
-export const isCameraAvailable = true;
-
-// If you really need a mock for web/simulator where camera might be missing:
-/*
-export const CameraView = (props: CameraViewProps) => {
-    if (!ExpoCameraView) return <View><Text>Camera module missing</Text></View>;
-    return <ExpoCameraView {...props} />;
+try {
+    CameraPackage = require('expo-camera');
+} catch (error) {
+    console.warn('expo-camera module not found or failed to load:', error);
 }
-*/
+
+// Mock CameraView component for fallback
+const MockCameraView = (props: any) => {
+    return (
+        <View style= { [styles.container, props.style]} >
+        <Text style={ styles.text }>
+            Camera unavailable.{ '\n' }Native module not found.
+            </Text>
+                </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    text: {
+        color: 'white',
+        textAlign: 'center',
+    }
+});
+
+// Exports
+export const CameraView = CameraPackage?.CameraView || MockCameraView;
+
+// Safe permission hook
+export const useCameraPermissions = CameraPackage?.useCameraPermissions || (() => [
+    { granted: false, status: 'denied', canAskAgain: false, expires: 'never' },
+    async () => ({ granted: false, status: 'denied', canAskAgain: false, expires: 'never' })
+]);
+
+export const isCameraAvailable = !!CameraPackage?.CameraView;
