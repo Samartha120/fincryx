@@ -1,5 +1,5 @@
 import { Modal, Text, View, Pressable, Platform, Dimensions } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 
 interface PermissionModalProps {
@@ -15,12 +15,14 @@ export function PermissionModal({ visible, type, onClose, onAccept }: Permission
 
     const content = type === 'notification' ? {
         icon: 'bell-o',
+        family: 'FontAwesome',
         title: 'Stay Updated',
         description: 'Enable notifications to get instant alerts for transactions, security updates, and loan approvals.',
         allowText: 'Enable Notifications',
         denyText: 'Maybe Later'
     } : {
         icon: 'fingerprint',
+        family: 'MaterialCommunityIcons',
         title: 'Quick Access',
         description: 'Enable biometric login to access your account securely and quickly without typing your password.',
         allowText: 'Enable Biometrics',
@@ -40,11 +42,19 @@ export function PermissionModal({ visible, type, onClose, onAccept }: Permission
                     {/* Icon Header */}
                     <View className="items-center mb-5">
                         <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center mb-4">
-                            <FontAwesome
-                                name={content.icon as any}
-                                size={32}
-                                color="#4F46E5"
-                            />
+                            {content.family === 'MaterialCommunityIcons' ? (
+                                <MaterialCommunityIcons
+                                    name={content.icon as any}
+                                    size={32}
+                                    color="#4F46E5"
+                                />
+                            ) : (
+                                <FontAwesome
+                                    name={content.icon as any}
+                                    size={32}
+                                    color="#4F46E5"
+                                />
+                            )}
                         </View>
                         <Text className="text-xl font-bold text-text-primary text-center mb-2">
                             {content.title}
