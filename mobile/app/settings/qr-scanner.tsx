@@ -116,12 +116,28 @@ export default function QRScannerScreen() {
                     <View style={styles.unfocusedContainer}></View>
                 </View>
 
-                <View className="absolute bottom-20 self-center items-center gap-4">
-                    <View className="bg-black/60 px-6 py-3 rounded-full overflow-hidden border border-white/20">
-                        <Text className="text-white text-base font-medium">
-                            Scan a Profile QR Code
-                        </Text>
+                <View className="absolute bottom-10 left-4 right-4 items-center">
+                    <View className="bg-surface/90 backdrop-blur-md p-4 rounded-2xl flex-row items-center border border-white/20 shadow-lg w-full max-w-sm">
+                        <Avatar name={user?.fullName || user?.email || 'User'} size="lg" />
+                        <View className="ml-4 flex-1">
+                            <Text className="text-lg font-bold text-text-primary mb-0.5" numberOfLines={1}>
+                                {user?.fullName || 'User'}
+                            </Text>
+                            <Text className="text-body text-text-secondary mb-1" numberOfLines={1}>
+                                {user?.email || 'email@example.com'}
+                            </Text>
+                            <View className="flex-row">
+                                <View className="bg-primary/20 px-2 py-0.5 rounded-md">
+                                    <Text className="text-xs font-semibold text-primary uppercase">
+                                        {user?.role || 'Member'}
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
                     </View>
+                    <Text className="text-white/80 text-sm mt-4 font-medium shadow-black shadow-md">
+                        Align QR code within the frame to scan
+                    </Text>
                 </View>
             </View>
         </Screen>

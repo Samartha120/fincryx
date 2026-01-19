@@ -50,7 +50,7 @@ describe('Analytics charts render without crashing', () => {
 
     const { getByText } = render(<TransferActivityChart transactions={txs} loading={false} />);
 
-    expect(getByText('Transfers')).toBeTruthy();
+    expect(getByText('Sent')).toBeTruthy();
   });
 
   it('renders SpendingPatternChart with sample accounts and transactions', () => {
@@ -104,6 +104,6 @@ describe('Analytics charts render without crashing', () => {
       <LoanOverviewChart title="Loan overview" currency="INR" data={data} loading={false} error={null} />,
     );
 
-    expect(getByText('Loan overview')).toBeTruthy();
+    expect(getByText('Total Borrowed Amount')).toBeTruthy();
   });
 });

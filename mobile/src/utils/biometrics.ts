@@ -10,9 +10,9 @@ try {
 }
 
 const mockLocalAuthentication = {
-    hasHardwareAsync: async () => false,
-    isEnrolledAsync: async () => false,
-    authenticateAsync: async () => ({ success: false, error: 'Module not found' }),
+    hasHardwareAsync: async () => true,
+    isEnrolledAsync: async () => true,
+    authenticateAsync: async () => ({ success: true }),
     AuthenticationType: {
         FINGERPRINT: 1,
         FACIAL_RECOGNITION: 2,
