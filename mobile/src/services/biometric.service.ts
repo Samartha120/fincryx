@@ -20,12 +20,8 @@ export const BiometricService = {
     // Authenticate user (Stateless check)
     authenticateAsync: async (promptMessage = 'Authenticate to continue') => {
         try {
-            const hasHardware = await SafeLocalAuthentication.hasHardwareAsync();
-            if (!hasHardware) return { success: false, error: 'hardware_unavailable' };
-
-            const isEnrolled = await SafeLocalAuthentication.isEnrolledAsync();
-            if (!isEnrolled) return { success: false, error: 'not_enrolled' };
-
+            // We skip manual hardware/enrollment checks here to rely on the OS dialog
+            // handling the "not available" states or falling back gracefully.
             const result = await SafeLocalAuthentication.authenticateAsync({
                 promptMessage,
                 fallbackLabel: 'Use Passcode',

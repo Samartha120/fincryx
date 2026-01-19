@@ -31,6 +31,12 @@ export default function SplashScreen() {
     console.log('Auth state:', { isAuthenticated, userRole: user?.role });
 
     if (isAuthenticated && user) {
+      // Check for Biometric Lock on Startup
+      const { biometricEnabled } = usePreferencesStore.getState();
+      if (biometricEnabled) {
+        useAuthStore.getState().setLocked(true);
+      }
+
       // Redirect based on role
       console.log('Redirecting authenticated user, role:', user.role);
       if (user.role === 'admin') {

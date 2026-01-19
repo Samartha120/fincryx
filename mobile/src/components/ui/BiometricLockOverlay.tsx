@@ -2,14 +2,16 @@ import { BiometricService } from '@/src/services/biometric.service';
 import { useAuthStore } from '@/src/store/useAuthStore';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus, Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function BiometricLockOverlay() {
-    const { isLocked, setLocked, isAuthenticated, unlockWithBiometrics } = useAuthStore();
+    const { isLocked, setLocked, isAuthenticated, unlockWithBiometrics, logoutUser } = useAuthStore();
     const biometricEnabled = usePreferencesStore((s) => s.biometricEnabled);
+    const router = useRouter();
     const appState = useRef(AppState.currentState);
     const insets = useSafeAreaInsets();
 
@@ -65,6 +67,12 @@ export function BiometricLockOverlay() {
         }
     };
 
+    const handleLogout = async () => {
+        setLocked(false);
+        await logoutUser();
+        router.replace('/(auth)/login');
+    };
+
     if (!isLocked) return null;
 
     return (
@@ -84,6 +92,10 @@ export function BiometricLockOverlay() {
                     <MaterialCommunityIcons name="fingerprint" size={24} color="#FFFFFF" />
                     <Text style={styles.buttonText}>Unlock with Biometrics</Text>
                 </Pressable>
+
+                <Pressable onPress={handleLogout} style={[styles.button, styles.secondaryButton]}>
+                    <Text style={[styles.buttonText, styles.secondaryButtonText]}>Log Out</Text>
+                </Pressable>
             </View>
         </Animated.View>
     );
@@ -98,14 +110,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     content: {
+        width: '80%',
         alignItems: 'center',
-        padding: 20,
     },
     iconContainer: {
         width: 100,
         height: 100,
+        backgroundColor: 'rgba(79, 70, 229, 0.1)',
         borderRadius: 50,
-        backgroundColor: '#EEF2FF',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
@@ -123,16 +135,27 @@ const styles = StyleSheet.create({
     },
     button: {
         flexDirection: 'row',
-        alignItems: 'center',
         backgroundColor: '#4F46E5',
-        paddingVertical: 12,
         paddingHorizontal: 24,
+        paddingVertical: 14,
         borderRadius: 12,
+        alignItems: 'center',
+        width: '100%',
+        justifyContent: 'center',
+        gap: 8,
     },
     buttonText: {
         color: '#FFFFFF',
-        fontWeight: '600',
-        marginLeft: 8,
         fontSize: 16,
+        fontWeight: '600',
+    },
+    secondaryButton: {
+        backgroundColor: 'transparent',
+        marginTop: 16,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    secondaryButtonText: {
+        color: '#6B7280',
     },
 });
