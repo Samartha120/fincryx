@@ -67,9 +67,9 @@ export function ActionSheet({
                         styles.sheet,
                         { transform: [{ translateY: slideAnim }] },
                     ]}
-                    className="bg-white dark:bg-neutral-800"
+                    className="bg-surface"
                 >
-                    <View className="w-12 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full self-center my-3" />
+                    <View className="w-12 h-1 bg-neutral-200 dark:bg-border rounded-full self-center my-3" />
 
                     {title && (
                         <Text className="text-center text-lg font-bold text-text-primary mb-4 px-4">
@@ -92,7 +92,7 @@ export function ActionSheet({
                                     }}
                                     className={`flex-row items-center p-4 rounded-xl mb-2 ${isSelected
                                             ? 'bg-primary/10'
-                                            : 'active:bg-neutral-100 dark:active:bg-neutral-700'
+                                            : 'active:bg-background-subtle'
                                         }`}
                                 >
                                     <View className="w-8 items-center justify-center mr-3">

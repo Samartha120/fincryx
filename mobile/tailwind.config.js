@@ -18,6 +18,7 @@ module.exports = {
         },
         // Backgrounds
         background: 'rgb(var(--color-background) / <alpha-value>)',
+        'background-subtle': 'rgb(var(--color-background-subtle) / <alpha-value>)',
         surface: 'rgb(var(--color-surface) / <alpha-value>)',
         // Text Colors
         text: {

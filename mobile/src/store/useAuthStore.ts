@@ -168,6 +168,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { setBiometricEnabled } = require('./usePreferencesStore').usePreferencesStore.getState();
     await setBiometricEnabled(false);
 
+    // Clear Last Email (User Request: "id should be removed")
+    await setItem(authKeys.lastEmail, null);
+
     set({ token: null, refreshToken: null, user: null, isAuthenticated: false });
   },
 

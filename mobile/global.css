@@ -10,6 +10,7 @@
 
 	/* Surfaces */
 	--color-background: 249 250 251; /* #F9FAFB */
+	--color-background-subtle: 243 244 246; /* #F3F4F6 */
 	--color-surface: 255 255 255; /* #FFFFFF */
 
 	/* Text */
@@ -30,6 +31,7 @@
 .dark {
 	/* Surfaces */
 	--color-background: 11 16 32; /* #0B1020 */
+	--color-background-subtle: 11 16 32; /* #0B1020 - Seamless in dark mode */
 	--color-surface: 17 26 51; /* #111A33 */
 
 	/* Text */

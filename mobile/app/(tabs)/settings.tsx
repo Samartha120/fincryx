@@ -140,7 +140,8 @@ export default function SettingsScreen() {
     setSubmitting(true);
     try {
       await logoutUser();
-      router.replace('/');
+      // Explicitly redirect to login screen to avoid dashboard race condition
+      router.replace('/(auth)/login');
     } finally {
       setSubmitting(false);
     }
