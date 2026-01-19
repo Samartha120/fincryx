@@ -1,5 +1,6 @@
 import { Logo } from '@/src/components/ui/Logo';
 import { useAuthStore } from '@/src/store/useAuthStore';
+import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import React, { useEffect } from 'react';
@@ -10,10 +11,15 @@ export default function SplashScreen() {
   const spinnerColor = colorScheme === 'dark' ? '#6D8CFF' : '#1E40AF';
   const router = useRouter();
   const { isLoading, isAuthenticated, initialize, user } = useAuthStore();
+  const { initialize: initPreferences } = usePreferencesStore();
   const [hasInitialized, setHasInitialized] = React.useState(false);
 
   useEffect(() => {
-    initialize().then(() => setHasInitialized(true));
+    const init = async () => {
+      await Promise.all([initialize(), initPreferences()]);
+      setHasInitialized(true);
+    };
+    init();
   }, []);
 
   useEffect(() => {

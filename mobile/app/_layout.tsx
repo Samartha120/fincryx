@@ -13,6 +13,7 @@ import '../global.css';
 import { useColorScheme } from '@/components/useColorScheme';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { configureNotifications } from '@/src/lib/pushNotifications';
+import { BiometricLockOverlay } from '@/src/components/ui/BiometricLockOverlay';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -113,6 +114,7 @@ function RootLayoutNav() {
           <Stack.Screen name="(admin)" />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
+        <BiometricLockOverlay />
       </ThemeProvider>
     </SafeAreaProvider>
   );

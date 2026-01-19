@@ -16,8 +16,11 @@ type AuthState = {
   user: authApi.UserProfile | null;
   pendingVerificationEmail: string | null;
 
+  isLocked: boolean;
+
   // Actions
   initialize: () => Promise<void>;
+  setLocked: (locked: boolean) => void;
   loginUser: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   registerUser: (fullName: string, email: string, password: string) => Promise<void>;
   verifyOtp: (email: string, otp: string) => Promise<void>;
@@ -162,6 +165,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   // --- Biometric Actions ---
+
+  isLocked: false,
+
+  setLocked: (locked) => set({ isLocked: locked }),
 
   enableBiometrics: async () => {
     const { refreshToken } = get();

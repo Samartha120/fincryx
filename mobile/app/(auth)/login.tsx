@@ -11,10 +11,12 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View, Aler
 
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BiometricService } from '@/src/services/biometric.service';
+import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 
 export default function LoginScreen() {
   const router = useRouter();
   const { loginUser, unlockWithBiometrics, user, isAuthenticated } = useAuthStore();
+  const biometricEnabled = usePreferencesStore((s) => s.biometricEnabled);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,33 +29,16 @@ export default function LoginScreen() {
   // Check if we can offer biometric login
   useEffect(() => {
     (async () => {
-      // Check hardware + enrollment
+      // 1. Check hardware + enrollment
       const compatible = await BiometricService.checkHardwareAsync();
       if (!compatible) return;
 
-      // Check if we have a stored token
-      // In a real app we might just check if a key exists without reading it yet
-      // For now, we assume if checkHardwareAsync is true, we might have it.
-      // But purely relying on hardware isn't enough, we need to know if the USER enabled it.
-      // The BiometricService doesn't have a simple "isEnabled" check that is public without trying to get token.
-      // Let's add a simple check using SecureStore availability if possible, 
-      // or just Catch-22: we try to unlock? No, we show button if "likely" available.
-
-      // Better: The user should have "Enabled" it, which implies we have a token.
-      // We can check if the key exists in SecureStore (if the API supported just 'contains').
-      // Expo SecureStore doesn't strictly have 'contains'.
-      // We'll optimistically show it if hardware is presents, 
-      // OR store a simple AsyncStore flag "biometricsEnabled" to UI toggling.
-
-      const bioEnabledPref = await getItem('biometrics_enabled_flag');
-      // We need to make sure we actually save this flag in Settings when enabling.
-      // Since I didn't add that explicitly in Settings yet, I will use a logic 
-      // that tries to see if we can "Unlock".
-
-      // For now: Show if hardware is supported. The "Unlock" action handles "No token found" error gracefully.
-      setIsBioAvailable(compatible);
+      // 2. Check if user enabled it in preferences
+      if (biometricEnabled) {
+        setIsBioAvailable(true);
+      }
     })();
-  }, []);
+  }, [biometricEnabled]);
 
   const handleBiometricLogin = async () => {
     setIsLoading(true);
