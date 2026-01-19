@@ -12,6 +12,8 @@ import { ScreenHeader } from '@/src/components/ui/ScreenHeader';
 import { ScreenTransition } from '@/src/components/ui/ScreenTransition';
 import { useAuthStore } from '@/src/store/useAuthStore';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
+import { PermissionModal } from '@/src/components/ui/PermissionModal';
+import { requestNotificationPermissions, openSystemSettings } from '@/src/services/notification.service';
 
 // Dynamic Components
 import { ActionSheet } from '@/src/components/ui/ActionSheet';
@@ -77,7 +79,7 @@ function SettingsGroup({ title, children }: { title?: string; children: React.Re
 export default function SettingsScreen() {
   const { colorScheme } = useColorScheme();
   const router = useRouter();
-  const { user, logoutUser } = useAuthStore();
+  const { user, logoutUser, enableBiometrics, disableBiometrics } = useAuthStore();
 
   const theme = usePreferencesStore((s) => s.theme);
   const notificationsEnabled = usePreferencesStore((s) => s.notificationsEnabled);
@@ -90,6 +92,41 @@ export default function SettingsScreen() {
   const [showThemeSheet, setShowThemeSheet] = useState(false);
   const [showLanguageSheet, setShowLanguageSheet] = useState(false);
   const [showRateModal, setShowRateModal] = useState(false);
+
+  // Permission Flow State
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [permissionType, setPermissionType] = useState<'notification' | 'biometric'>('notification');
+
+  const handlePermissionAccept = async () => {
+    setShowPermissionModal(false);
+
+    if (permissionType === 'notification') {
+      const granted = await requestNotificationPermissions();
+      if (granted) {
+        setNotificationsEnabled(true);
+      } else {
+        Alert.alert(
+          'Permission Required',
+          'Notifications are currently disabled. Please enable them in settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: openSystemSettings }
+          ]
+        );
+      }
+    } else {
+      // Biometric Flow
+      const success = await enableBiometrics();
+      if (success) {
+        setBiometricEnabled(true);
+        Alert.alert('Success', 'Biometric login enabled!');
+      } else {
+        setBiometricEnabled(false);
+        // Error is usually handled/logged in service, but we can show generic alert
+        // or the user cancelled prompt.
+      }
+    }
+  };
 
   // Derive display values
   const currentThemeLabel = useMemo(() => {
@@ -109,39 +146,7 @@ export default function SettingsScreen() {
     }
   }
 
-  // Handle Biometric Toggle
-  const toggleBiometric = async (value: boolean) => {
-    try {
-      if (value) {
-        const result = await SafeLocalAuthentication.authenticateAsync({
-          promptMessage: 'Authenticate to enable biometric lock',
-          cancelLabel: 'Cancel',
-        });
 
-        if (result?.success) {
-          setBiometricEnabled(true);
-          return;
-        }
-
-        if (result?.error === 'user_cancel' || result?.error === 'system_cancel') {
-          return;
-        }
-
-        Alert.alert(
-          'Biometric not available',
-          'Please make sure fingerprint or face unlock is set up on this device and try again.',
-        );
-      } else {
-        setBiometricEnabled(false);
-      }
-    } catch (error) {
-      console.error('Biometric error:', error);
-      Alert.alert(
-        'Authentication error',
-        'Biometric authentication is not available or failed on this device.',
-      );
-    }
-  };
 
   return (
     <Screen edges={['top', 'left', 'right']} className="bg-background-subtle">
@@ -197,17 +202,26 @@ export default function SettingsScreen() {
                 icon="bell-o"
                 iconColor="#F59E0B"
                 title="Notifications"
-                onPress={() => router.push('/(tabs)/notifications')}
+                onPress={() => {
+                  if (!notificationsEnabled) {
+                    setPermissionType('notification');
+                    setShowPermissionModal(true);
+                  } else {
+                    // If disabling, we can just turn off the preference, 
+                    // but we can't revoke system permission programmatically on Android usually.
+                    // Just update local state.
+                    setNotificationsEnabled(false);
+                  }
+                }}
                 rightElement={
                   <Switch
                     value={notificationsEnabled}
-                    onValueChange={async (v) => {
-                      await setNotificationsEnabled(v);
+                    onValueChange={(v) => {
                       if (v) {
-                        Alert.alert(
-                          'Notifications enabled',
-                          'You will get alerts about transfers, payments, loans and important account activity.',
-                        );
+                        setPermissionType('notification');
+                        setShowPermissionModal(true);
+                      } else {
+                        setNotificationsEnabled(false);
                       }
                     }}
                     thumbColor="#FFFFFF"
@@ -236,7 +250,17 @@ export default function SettingsScreen() {
                 rightElement={
                   <Switch
                     value={biometricEnabled}
-                    onValueChange={toggleBiometric}
+                    onValueChange={(v) => {
+                      if (v) {
+                        setPermissionType('biometric');
+                        setShowPermissionModal(true);
+                      } else {
+                        // disable
+                        disableBiometrics().then(success => {
+                          if (success) setBiometricEnabled(false);
+                        });
+                      }
+                    }}
                     thumbColor="#FFFFFF"
                     trackColor={{ false: '#374151', true: '#3B82F6' }}
                   />
@@ -335,6 +359,13 @@ export default function SettingsScreen() {
         onSubmit={(rating) => {
           Alert.alert('Thank You!', `You rated us ${rating} stars.`);
         }}
+      />
+
+      <PermissionModal
+        visible={showPermissionModal}
+        type={permissionType}
+        onClose={() => setShowPermissionModal(false)}
+        onAccept={handlePermissionAccept}
       />
     </Screen>
   );
