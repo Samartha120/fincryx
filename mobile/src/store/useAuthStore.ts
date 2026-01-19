@@ -159,8 +159,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logoutUser: async () => {
     try { await authApi.logout(); } catch (e) { }
+    
+    // Clear Auth Data
     await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY]);
     setHttpAccessToken(null);
+
+    // Clear Biometric Flag (Requirement: Clear biometric access on logout)
+    const { setBiometricEnabled } = require('./usePreferencesStore').usePreferencesStore.getState();
+    await setBiometricEnabled(false);
+
     set({ token: null, refreshToken: null, user: null, isAuthenticated: false });
   },
 

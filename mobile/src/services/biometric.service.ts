@@ -70,37 +70,26 @@ export const BiometricService = {
     },
 
     // Unlock Session
-    // Authenticates user -> Retrieves Refresh Token -> Returns it for auto-login
+    // Retrieves Refresh Token directly using SecureStore authentication
     unlockSessionWithBiometrics: async () => {
         try {
-            // Check if we even have a token stored
-            const hasToken = await SecureStore.getItemAsync(BIOMETRIC_TOKEN_KEY);
-            if (!hasToken) {
+            // Retrieve Token (This triggers the system biometric prompt on Android)
+            // We skip the separate authenticateAsync call to avoid double prompts
+            const refreshToken = await SecureStore.getItemAsync(BIOMETRIC_TOKEN_KEY, {
+                requireAuthentication: true,
+                authenticationPrompt: 'Unlock Finoryx'
+            });
+
+            if (!refreshToken) {
                 return { success: false, error: 'no_token_stored' };
             }
-
-            // Authenticate
-            const authResult = await BiometricService.authenticateAsync('Unlock Finoryx');
-            if (!authResult.success) {
-                return authResult;
-            }
-
-            // Retrieve Token (The strict `requireAuthentication` in setItem ensures system handling)
-            // On Android, simply retrieving it after auth should work if checking access control.
-            // But expo-secure-store handled the auth prompt above mostly for UI flow.
-            // If we used `requireAuthentication: true` in setItem, getItemAsync might prompt AGAIN on some versions
-            // if we didn't use `authenticateAsync` above. 
-            // However, to be safe and consistent with UX:
-            // We use the `authenticateAsync` for the UI feedback, and `getItemAsync` to actually get data.
-
-            const refreshToken = await SecureStore.getItemAsync(BIOMETRIC_TOKEN_KEY, {
-                requireAuthentication: true // Ensures system level protection
-            });
 
             return { success: true, token: refreshToken };
 
         } catch (e) {
             console.error('Biometric unlock failed', e);
+            // Distinguish between cancel and other errors if possible, 
+            // but for now return generic error which keeps overlay open
             return { success: false, error: 'storage_error' };
         }
     }
