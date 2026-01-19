@@ -17,10 +17,11 @@ interface InsightSummaryProps {
     onSeeAllPress?: () => void;
     monthlySpend?: number;
     monthlySpendCurrency?: string;
+    monthlyIncome?: number;
     loanStatus?: { paid: number; total: number; currency: string };
 }
 
-export function InsightSummary({ monthlySpend, monthlySpendCurrency = 'INR', loanStatus }: InsightSummaryProps) {
+export function InsightSummary({ monthlySpend, monthlySpendCurrency = 'INR', monthlyIncome, loanStatus }: InsightSummaryProps) {
     return (
         <ScrollView
             horizontal
@@ -29,42 +30,43 @@ export function InsightSummary({ monthlySpend, monthlySpendCurrency = 'INR', loa
             className="flex-row"
         >
             {/* Monthly Spend Card */}
-            <View className="bg-white p-4 rounded-2xl w-40 shadow-sm border border-neutral-100">
-                <View className="flex-row justify-between items-start mb-2">
-                    <View className="bg-red-50 p-2 rounded-full">
+            <View className="bg-white dark:bg-neutral-800 p-5 rounded-3xl w-44 shadow-sm border border-neutral-100 dark:border-neutral-700">
+                <View className="flex-row justify-between items-start mb-3">
+                    <View className="bg-rose-50 dark:bg-rose-900/20 p-2.5 rounded-full">
                         <FontAwesome name="arrow-down" size={14} color="#EF4444" />
                     </View>
-                    <Text className="text-xs text-text-secondary font-medium bg-neutral-50 px-2 py-0.5 rounded-full">30d</Text>
+                    <Text className="text-[10px] text-text-secondary font-medium bg-neutral-50 dark:bg-neutral-900 px-2 py-1 rounded-full overflow-hidden">30d</Text>
                 </View>
-                <Text className="text-text-secondary text-xs mb-1">Monthly Spend</Text>
-                <Text className="text-text-primary text-lg font-bold">
+                <Text className="text-text-secondary text-xs mb-1 font-medium">Monthly Spend</Text>
+                <Text className="text-text-primary text-xl font-bold tracking-tight">
                     {monthlySpend ? formatMoneyMinor(monthlySpend, monthlySpendCurrency) : '—'}
                 </Text>
             </View>
 
-            {/* Loan Status Card */}
-            <View className="bg-white p-4 rounded-2xl w-40 shadow-sm border border-neutral-100">
-                <View className="flex-row justify-between items-start mb-2">
-                    <View className="bg-emerald-50 p-2 rounded-full">
-                        <FontAwesome name="check" size={14} color="#10B981" />
+            {/* Monthly Income Card */}
+            <View className="bg-white dark:bg-neutral-800 p-5 rounded-3xl w-44 shadow-sm border border-neutral-100 dark:border-neutral-700">
+                <View className="flex-row justify-between items-start mb-3">
+                    <View className="bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-full">
+                        <FontAwesome name="arrow-up" size={14} color="#10B981" />
                     </View>
+                    <Text className="text-[10px] text-text-secondary font-medium bg-neutral-50 dark:bg-neutral-900 px-2 py-1 rounded-full overflow-hidden">30d</Text>
                 </View>
-                <Text className="text-text-secondary text-xs mb-1">Loans Paid</Text>
-                <Text className="text-text-primary text-lg font-bold">
-                    {loanStatus ? `${Math.round((loanStatus.paid / Math.max(1, loanStatus.total)) * 100)}%` : '0%'}
+                <Text className="text-text-secondary text-xs mb-1 font-medium">Monthly Income</Text>
+                <Text className="text-text-primary text-xl font-bold tracking-tight">
+                    {monthlyIncome ? formatMoneyMinor(monthlyIncome, monthlySpendCurrency) : formatMoneyMinor(0, monthlySpendCurrency)}
                 </Text>
             </View>
 
-            {/* Savings/Income Mock Card (To fill space and look good) */}
-            <View className="bg-white p-4 rounded-2xl w-40 shadow-sm border border-neutral-100">
-                <View className="flex-row justify-between items-start mb-2">
-                    <View className="bg-blue-50 p-2 rounded-full">
-                        <FontAwesome name="line-chart" size={14} color="#3B82F6" />
+            {/* Loan Status Card */}
+            <View className="bg-white dark:bg-neutral-800 p-5 rounded-3xl w-44 shadow-sm border border-neutral-100 dark:border-neutral-700">
+                <View className="flex-row justify-between items-start mb-3">
+                    <View className="bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-full">
+                        <FontAwesome name="pie-chart" size={14} color="#3B82F6" />
                     </View>
                 </View>
-                <Text className="text-text-secondary text-xs mb-1">Income Trend</Text>
-                <Text className="text-text-primary text-lg font-bold">
-                    +12%
+                <Text className="text-text-secondary text-xs mb-1 font-medium">Loans Paid</Text>
+                <Text className="text-text-primary text-xl font-bold tracking-tight">
+                    {loanStatus ? `${Math.round((loanStatus.paid / Math.max(1, loanStatus.total)) * 100)}%` : '0%'}
                 </Text>
             </View>
         </ScrollView>

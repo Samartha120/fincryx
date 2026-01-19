@@ -219,6 +219,11 @@ export default function DashboardScreen() {
                   monthlySpend={monthlySpend}
                   monthlySpendCurrency={primaryAccount?.currency ?? 'INR'}
                   loanStatus={loanStats}
+                  monthlyIncome={(() => {
+                    const credit = analytics.transactions?.credit ?? [];
+                    // Return the last item (current month) or 0
+                    return credit.length > 0 ? Number(credit[credit.length - 1]) : 0;
+                  })()}
                 />
               </View>
             </AnimatedIn>

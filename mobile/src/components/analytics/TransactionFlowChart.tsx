@@ -171,12 +171,15 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
                       key={`income-point-${point.label}-${index}`}
                       style={{
                         position: 'absolute',
-                        left: point.x - 3,
-                        top: point.y - 3,
-                        width: 6,
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: '#10B981',
+                        left: point.x - 4, // Center larger dot
+                        top: point.y - 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: '#10B981', // emerald-500
+                        borderWidth: 1.5,
+                        borderColor: '#fff',
+                        zIndex: 10,
                       }}
                     />
                   );
@@ -196,20 +199,24 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
                         left: point.x,
                         top: point.y,
                         width: length,
-                        height: 2,
+                        height: 3, // Thicker line
                         backgroundColor: '#10B981',
                         transform: [{ rotateZ: `${angleDeg}deg` }],
+                        opacity: 0.8,
                       }}
                     />
                     <View
                       style={{
                         position: 'absolute',
-                        left: point.x - 3,
-                        top: point.y - 3,
-                        width: 6,
-                        height: 6,
-                        borderRadius: 3,
+                        left: point.x - 4,
+                        top: point.y - 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
                         backgroundColor: '#10B981',
+                        borderWidth: 1.5,
+                        borderColor: '#fff',
+                        zIndex: 10,
                       }}
                     />
                   </View>
@@ -224,12 +231,15 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
                       key={`expense-point-${point.label}-${index}`}
                       style={{
                         position: 'absolute',
-                        left: point.x - 3,
-                        top: point.y - 3,
-                        width: 6,
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: '#FB7185',
+                        left: point.x - 4,
+                        top: point.y - 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: '#F43F5E', // rose-500
+                        borderWidth: 1.5,
+                        borderColor: '#fff',
+                        zIndex: 10,
                       }}
                     />
                   );
@@ -249,20 +259,24 @@ export const TransactionFlowChart = memo(function TransactionFlowChart({
                         left: point.x,
                         top: point.y,
                         width: length,
-                        height: 2,
-                        backgroundColor: '#FB7185',
+                        height: 3, // Thicker line
+                        backgroundColor: '#F43F5E',
                         transform: [{ rotateZ: `${angleDeg}deg` }],
+                        opacity: 0.8,
                       }}
                     />
                     <View
                       style={{
                         position: 'absolute',
-                        left: point.x - 3,
-                        top: point.y - 3,
-                        width: 6,
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: '#FB7185',
+                        left: point.x - 4,
+                        top: point.y - 4,
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: '#F43F5E',
+                        borderWidth: 1.5,
+                        borderColor: '#fff',
+                        zIndex: 10,
                       }}
                     />
                   </View>

@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Text, View, ViewStyle } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 
 import { formatMoneyMinor } from '@/src/lib/money';
 
@@ -12,26 +13,41 @@ interface HeroCardProps {
 }
 
 export function HeroCard({ totalBalanceMinor, currency, accountType = 'Total Balance', style }: HeroCardProps) {
+    const translateY = useSharedValue(0);
+
+    useEffect(() => {
+        translateY.value = withRepeat(
+            withTiming(-8, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+            -1,
+            true
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+    }));
+
     return (
-        <View style={style} className="shadow-lg shadow-blue-900/20 rounded-3xl">
+        <Animated.View style={[style, animatedStyle]} className="shadow-xl shadow-blue-900/30 rounded-[40px]">
             <LinearGradient
                 colors={['#1E40AF', '#3B82F6']} // Deep blue to lighter blue
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="rounded-3xl p-6"
+                className="rounded-[40px] p-8"
             >
                 <Text className="text-blue-100 text-sm font-medium tracking-wide uppercase opacity-80">
                     {accountType}
                 </Text>
-                <Text className="text-white text-4xl font-bold mt-2 tracking-tight">
+                <Text className="text-white text-5xl font-bold mt-3 tracking-tight">
                     {formatMoneyMinor(totalBalanceMinor, currency)}
                 </Text>
-                <View className="flex-row items-center mt-6 bg-white/10 self-start px-3 py-1 rounded-full border border-white/20">
+                <View className="flex-row items-center mt-8 bg-white/10 self-start px-4 py-1.5 rounded-full border border-white/20">
+                    <View className="w-2 h-2 rounded-full bg-emerald-400 mr-2" />
                     <Text className="text-white text-xs font-medium">
-                        Active • {currency}
+                        Active Account
                     </Text>
                 </View>
             </LinearGradient>
-        </View>
+        </Animated.View>
     );
 }
