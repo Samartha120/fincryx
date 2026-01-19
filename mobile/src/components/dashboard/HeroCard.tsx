@@ -13,22 +13,8 @@ interface HeroCardProps {
 }
 
 export function HeroCard({ totalBalanceMinor, currency, accountType = 'Total Balance', style }: HeroCardProps) {
-    const translateY = useSharedValue(0);
-
-    useEffect(() => {
-        translateY.value = withRepeat(
-            withTiming(-8, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-            -1,
-            true
-        );
-    }, []);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: translateY.value }],
-    }));
-
     return (
-        <Animated.View style={[style, animatedStyle]} className="shadow-xl shadow-blue-900/30 rounded-[40px]">
+        <View style={style} className="shadow-xl shadow-blue-900/30 rounded-[40px]">
             <LinearGradient
                 colors={['#1E40AF', '#3B82F6']} // Deep blue to lighter blue
                 start={{ x: 0, y: 0 }}
@@ -48,6 +34,6 @@ export function HeroCard({ totalBalanceMinor, currency, accountType = 'Total Bal
                     </Text>
                 </View>
             </LinearGradient>
-        </Animated.View>
+        </View>
     );
 }
