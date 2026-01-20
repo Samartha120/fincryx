@@ -10,7 +10,8 @@ let cameraError: any = null;
 try {
     CameraPackage = require('expo-camera');
 } catch (error) {
-    console.warn('expo-camera module not found or failed to load:', error);
+    // Silent catch to prevent console spam. 
+    // The UI will show a helpful error message if the camera is needed.
     cameraError = error;
 }
 
@@ -25,6 +26,9 @@ const MockCameraView = (props: any) => {
         <View style={[styles.container, props.style]}>
             <Text style={styles.text}>
                 Camera unavailable.{'\n'}Native module not found.
+            </Text>
+            <Text style={styles.subText}>
+                If you are using a Development Build, please rebuild the app.
             </Text>
         </View>
     );
@@ -41,6 +45,14 @@ const styles = StyleSheet.create({
     text: {
         color: 'white',
         textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    subText: {
+        color: '#ccc',
+        textAlign: 'center',
+        fontSize: 12,
     }
 });
 

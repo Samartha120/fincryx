@@ -3,7 +3,7 @@ import { useAuthStore } from '@/src/store/useAuthStore';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus, Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +14,11 @@ export function BiometricLockOverlay() {
     const router = useRouter();
     const appState = useRef(AppState.currentState);
     const insets = useSafeAreaInsets();
+    const [biometricType, setBiometricType] = useState('Biometrics');
+
+    useEffect(() => {
+        BiometricService.getBiometricTypeAsync().then(setBiometricType);
+    }, []);
 
     // 1. Listen to AppState to auto-lock
     useEffect(() => {
@@ -89,8 +94,12 @@ export function BiometricLockOverlay() {
                 <Text style={styles.subtitle}>Unlock securely to continue</Text>
 
                 <Pressable onPress={handleUnlock} style={styles.button}>
-                    <MaterialCommunityIcons name="fingerprint" size={24} color="#FFFFFF" />
-                    <Text style={styles.buttonText}>Unlock with Biometrics</Text>
+                    <MaterialCommunityIcons 
+                        name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'} 
+                        size={24} 
+                        color="#FFFFFF" 
+                    />
+                    <Text style={styles.buttonText}>Unlock with {biometricType}</Text>
                 </Pressable>
 
                 <Pressable onPress={handleLogout} style={[styles.button, styles.secondaryButton]}>

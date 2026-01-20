@@ -1,8 +1,9 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { SafeLocalAuthentication } from '@/src/utils/biometrics';
+import { BiometricService } from '@/src/services/biometric.service';
 import { useColorScheme } from 'nativewind';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 
 import { AnimatedIn } from '@/src/components/ui/AnimatedIn';
@@ -13,7 +14,7 @@ import { ScreenTransition } from '@/src/components/ui/ScreenTransition';
 import { useAuthStore } from '@/src/store/useAuthStore';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { PermissionModal } from '@/src/components/ui/PermissionModal';
-import { requestNotificationPermissions, openSystemSettings } from '@/src/services/notification.service';
+import { requestNotificationPermissions, openSystemSettings, checkNotificationPermissions } from '@/src/services/notification.service';
 
 // Dynamic Components
 import { ActionSheet } from '@/src/components/ui/ActionSheet';
@@ -79,14 +80,15 @@ function SettingsGroup({ title, children }: { title?: string; children: React.Re
 export default function SettingsScreen() {
   const { colorScheme } = useColorScheme();
   const router = useRouter();
-  const { user, logoutUser, enableBiometrics, disableBiometrics } = useAuthStore();
-
-  const theme = usePreferencesStore((s) => s.theme);
-  const notificationsEnabled = usePreferencesStore((s) => s.notificationsEnabled);
-  const biometricEnabled = usePreferencesStore((s) => s.biometricEnabled);
-  const setTheme = usePreferencesStore((s) => s.setTheme);
-  const setNotificationsEnabled = usePreferencesStore((s) => s.setNotificationsEnabled);
-  const setBiometricEnabled = usePreferencesStore((s) => s.setBiometricEnabled);
+  const { logoutUser, user, enableBiometrics, disableBiometrics } = useAuthStore();
+  const {
+    theme,
+    setTheme,
+    notificationsEnabled,
+    setNotificationsEnabled,
+    biometricEnabled,
+    setBiometricEnabled,
+  } = usePreferencesStore();
 
   const [submitting, setSubmitting] = useState(false);
   const [showThemeSheet, setShowThemeSheet] = useState(false);
@@ -96,6 +98,38 @@ export default function SettingsScreen() {
   // Permission Flow State
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [permissionType, setPermissionType] = useState<'notification' | 'biometric'>('notification');
+  const [biometricType, setBiometricType] = useState<string>('Biometric');
+
+  // Sync permissions when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      // Check Notifications
+      checkNotificationPermissions()
+        .then((status) => {
+          if (status !== 'granted' && notificationsEnabled) {
+            setNotificationsEnabled(false);
+          }
+        })
+        .catch((err) => {
+          console.warn('Failed to check notification permissions:', err);
+        });
+
+      // Check Biometrics (Sync with system status)
+      SafeLocalAuthentication.isEnrolledAsync()
+        .then((isEnrolled: boolean) => {
+          if (!isEnrolled && biometricEnabled) {
+            setBiometricEnabled(false);
+          }
+        })
+        .catch((err: any) => {
+          console.warn('Failed to check biometric enrollment:', err);
+        });
+    }, [notificationsEnabled, setNotificationsEnabled, biometricEnabled, setBiometricEnabled])
+  );
+
+  useEffect(() => {
+    BiometricService.getBiometricTypeAsync().then(setBiometricType);
+  }, []);
 
   const handlePermissionAccept = async () => {
     setShowPermissionModal(false);
@@ -122,8 +156,7 @@ export default function SettingsScreen() {
         Alert.alert('Success', 'Biometric login enabled!');
       } else {
         setBiometricEnabled(false);
-        // Error is usually handled/logged in service, but we can show generic alert
-        // or the user cancelled prompt.
+        Alert.alert('Authentication Failed', 'Could not enable biometrics. Please ensure you have biometrics set up on your device.');
       }
     }
   };
@@ -216,11 +249,32 @@ export default function SettingsScreen() {
                 }}
                 rightElement={
                   <Switch
-                    value={notificationsEnabled}
-                    onValueChange={(v) => {
+                    value={!!notificationsEnabled}
+                    onValueChange={async (v) => {
                       if (v) {
-                        setPermissionType('notification');
-                        setShowPermissionModal(true);
+                        try {
+                          // Check if system permission is already denied
+                          const status = await checkNotificationPermissions();
+                          if (status === 'denied') {
+                            Alert.alert(
+                              'Permission Required',
+                              'Notifications are disabled in system settings. Please enable them to receive updates.',
+                              [
+                                { text: 'Cancel', style: 'cancel' },
+                                { text: 'Open Settings', onPress: openSystemSettings }
+                              ]
+                            );
+                            return;
+                          }
+  
+                          setPermissionType('notification');
+                          setShowPermissionModal(true);
+                        } catch (error) {
+                          console.warn('Permission check failed:', error);
+                          // Fallback to showing modal if check fails
+                          setPermissionType('notification');
+                          setShowPermissionModal(true);
+                        }
                       } else {
                         setNotificationsEnabled(false);
                       }
@@ -247,7 +301,7 @@ export default function SettingsScreen() {
                 icon="lock"
                 iconColor="#EF4444"
                 title="Biometric Lock"
-                subtitle="Face ID / Fingerprint"
+                subtitle={biometricType}
                 rightElement={
                   <Switch
                     value={biometricEnabled}

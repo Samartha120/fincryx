@@ -17,6 +17,25 @@ export const BiometricService = {
         }
     },
 
+    // Get the specific biometric type (Face ID vs Touch ID)
+    getBiometricTypeAsync: async () => {
+        try {
+            const types = await SafeLocalAuthentication.supportedAuthenticationTypesAsync();
+            // Safe check for AuthenticationType enum
+            const AuthType = SafeLocalAuthentication.AuthenticationType || { FINGERPRINT: 1, FACIAL_RECOGNITION: 2 };
+            
+            if (types.includes(AuthType.FACIAL_RECOGNITION)) {
+                return 'Face ID';
+            }
+            if (types.includes(AuthType.FINGERPRINT)) {
+                return 'Touch ID';
+            }
+            return 'Biometrics';
+        } catch (e) {
+            return 'Biometrics';
+        }
+    },
+
     // Authenticate user (Stateless check)
     authenticateAsync: async (promptMessage = 'Authenticate to continue') => {
         try {
@@ -86,10 +105,15 @@ export const BiometricService = {
 
             return { success: true, token: refreshToken };
 
-        } catch (e) {
+        } catch (e: any) {
+            const errorMessage = e?.message || String(e);
+            // Suppress "User canceled" errors from logs as they are expected user actions
+            if (errorMessage.includes('User canceled') || errorMessage.includes('cancelled')) {
+                // Return a specific error code but don't log it as an error
+                return { success: false, error: 'user_canceled' };
+            }
+
             console.error('Biometric unlock failed', e);
-            // Distinguish between cancel and other errors if possible, 
-            // but for now return generic error which keeps overlay open
             return { success: false, error: 'storage_error' };
         }
     }

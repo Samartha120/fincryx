@@ -1,0 +1,33 @@
+diff --git a/node_modules/react-native/ReactCommon/cmake-utils/react-native-flags.cmake b/node_modules/react-native/ReactCommon/cmake-utils/react-native-flags.cmake
+index d005a4e..f74f0b2 100644
+--- a/node_modules/react-native/ReactCommon/cmake-utils/react-native-flags.cmake
++++ b/node_modules/react-native/ReactCommon/cmake-utils/react-native-flags.cmake
+@@ -30,6 +30,6 @@ function(target_compile_reactnative_options target_name scope)
+   target_compile_options(${target_name} ${scope} ${reactnative_FLAGS})
+   # TODO T228344694 improve this so that it works for all platforms
+   if(ANDROID)
+-    target_compile_definitions(${target_name} ${scope} RN_SERIALIZABLE_STATE)
++    # target_compile_definitions(${target_name} ${scope} RN_SERIALIZABLE_STATE)
+   endif()
+ endfunction()
+diff --git a/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h b/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h
+index bb59351..49298db 100644
+--- a/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h
++++ b/node_modules/react-native/ReactCommon/react/renderer/core/graphicsConversions.h
+@@ -10,6 +10,7 @@
+ #include <array>
+ #include <unordered_map>
+ 
++#include <folly/Format.h>
+ #include <glog/logging.h>
+ #include <react/debug/react_native_expect.h>
+ #include <react/renderer/core/PropsParserContext.h>
+@@ -77,7 +78,7 @@ inline folly::dynamic toDynamic(const YGValue& dimension) {
+     case YGUnitPoint:
+       return dimension.value;
+     case YGUnitPercent:
+-      return std::format("{}%", dimension.value);
++      return folly::dynamic(std::to_string(dimension.value) + "%");
+   }
+ 
+   return nullptr;

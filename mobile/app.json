@@ -32,7 +32,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-barcode-scanner",
       [
         "expo-camera",
         {
@@ -44,7 +43,18 @@
         {
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID for secure access."
         }
-      ]
+      ],
+      "expo-notifications",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "ndkVersion": "26.1.10909125",
+            "kotlinVersion": "2.0.21",
+            "newArchEnabled": true
+          }
+        }
+      ],
     ],
     "experiments": {
       "typedRoutes": true

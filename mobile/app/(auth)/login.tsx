@@ -24,6 +24,7 @@ export default function LoginScreen() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isBioAvailable, setIsBioAvailable] = useState(false);
+  const [biometricType, setBiometricType] = useState('Biometrics');
   const retryRef = useRef(false);
 
   // Check if we can offer biometric login
@@ -32,6 +33,10 @@ export default function LoginScreen() {
       // 1. Check hardware + enrollment
       const compatible = await BiometricService.checkHardwareAsync();
       if (!compatible) return;
+
+      // Get specific type
+      const type = await BiometricService.getBiometricTypeAsync();
+      setBiometricType(type);
 
       // 2. Check if user enabled it in preferences
       if (biometricEnabled) {
@@ -296,8 +301,12 @@ export default function LoginScreen() {
                   disabled={isLoading}
                   className="mt-4 flex-row items-center justify-center p-4 border border-primary/20 rounded-xl bg-primary/5 active:bg-primary/10"
                 >
-                  <MaterialCommunityIcons name="fingerprint" size={20} color="#4F46E5" />
-                  <Text className="ml-2 text-primary font-semibold">Unlock with Biometrics</Text>
+                  <MaterialCommunityIcons 
+                    name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'} 
+                    size={20} 
+                    color="#4F46E5" 
+                  />
+                  <Text className="ml-2 text-primary font-semibold">Unlock with {biometricType}</Text>
                 </Pressable>
               )}
 
