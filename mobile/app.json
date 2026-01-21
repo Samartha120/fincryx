@@ -61,11 +61,8 @@
     },
     "extra": {
       "apiUrl": "https://fincyrx.onrender.com",
-      "router": {},
-      "eas": {
-        "projectId": "cacfd480-61f9-4547-b0f2-915c868aba7c"
-      }
+      "router": {}
     },
-    "owner": "samartha205"
+    "owner": "temp-build-org"
   }
 }
