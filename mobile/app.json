@@ -23,7 +23,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.samartha205.mobile"
+      "package": "com.samartha205.mobile",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
