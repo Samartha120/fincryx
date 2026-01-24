@@ -1,12 +1,50 @@
+
+# Ignore unnecessary files for EAS Build
+local.properties
+android/local.properties
+.git
 node_modules/
 .expo/
 dist/
 web-build/
-android/local.properties
-local.properties
-**/local.properties
-*/local.properties
-android/build/
+*.jks
+*.keystore
+*.p12
+*.pem
+*.mobileprovision
+*.orig.*
+.DS_Store
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.metro-health-check*
+.env*.local
+
+# Platform builds (usually re-generated on server, but sometimes needed if prebuild is not used)
+# Since we are likely using prebuild or bare workflow (android folder exists), we need to be careful.
+# The user's .gitignore has /android and /ios, suggesting Managed workflow or Prebuild.
+# IF this is Managed flow, we exclude android/ios.
+# THE ISSUE: The user's .gitignore HAS /android and /ios.
+# This means these folders are GENERATED and should normally be ignored by EAS if we want a clean managed build.
+# HOWEVER, earlier the user had 'local.properties' IN android/, which implies they might rely on the local android folder.
+# BUT, the .gitignore shows /android is ignored!
+# Wait, if /android is ignored in .gitignore, then it shouldn't have been uploaded to EAS?
+# UNLESS 'eas build' respects .easignore over .gitignore or combines them?
+# "Files in .gitignore are ignored by default... unless allowed by .easignore"
+# If /android is in .gitignore, EAS shouldn't upload it unless forced.
+# The fact that 'local.properties' caused an issue suggests that the 'android' folder WAS being uploaded or processed?
+# Or maybe the earlier build failure was from a local build or a previous state?
+# The user's error logs showed "/home/expo/workingdir/build/mobile/android/..."
+# That strongly implies the android project IS being built on the server.
+# If .gitignore has /android, then `eas build` shouldn't upload it for a managed project.
+# BUT if this is a BARE project (or prebuild committed), /android should NOT be ignored.
+# The user's .gitignore has /android. This suggests it should be ignored.
+# So why did we have an issue with android/local.properties?
+# Maybe the user's .gitignore was NOT being respected or the file was force-added to git previously?
+# We verified 'local.properties' status.
+
+# To be safe and reduce size, let's explicitly ignore android/build and ios/build if they exist.
 android/app/build/
-android/.cxx/
-android/.gradle/
+android/build/
+ios/build/
+ios/Pods/
