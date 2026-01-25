@@ -1,8 +1,10 @@
 
 # Ignore unnecessary files for EAS Build
+
+# Ignore unnecessary files for EAS Build
+local.properties
 android/local.properties
 **/local.properties
-local.properties
 .git
 node_modules/
 .expo/
