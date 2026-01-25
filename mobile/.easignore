@@ -19,6 +19,8 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 .metro-health-check*
+android/
+ios/
 .env*.local
 android/.gradle/
 android/app/build/
