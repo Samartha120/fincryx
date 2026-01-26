@@ -1,3 +1,4 @@
+import 'expo-dev-client'; // Ensure Dev Client handles deep links/errors
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -5,14 +6,14 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme as useNWColorScheme } from 'nativewind';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
+// import 'react-native-reanimated'; // Temporarily disabled for debugging
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
-import { configureNotifications } from '@/src/lib/pushNotifications';
+// import { configureNotifications } from '@/src/lib/pushNotifications';
 import { BiometricLockOverlay } from '@/src/components/ui/BiometricLockOverlay';
 
 export {
@@ -75,7 +76,8 @@ export default function RootLayout() {
     // Delay notification setup to ensure native modules are fully initialized
     const setupNotifications = async () => {
       try {
-        await configureNotifications();
+        // await configureNotifications();
+        console.log("Notifications config disabled for debugging");
       } catch (error) {
         console.warn('Failed to setup notifications:', error);
         // App continues functioning even if notifications fail
