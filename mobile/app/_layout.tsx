@@ -72,11 +72,22 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    void usePreferencesStore.getState().initialize();
-  }, []);
+    // Delay notification setup to ensure native modules are fully initialized
+    const setupNotifications = async () => {
+      try {
+        await configureNotifications();
+      } catch (error) {
+        console.warn('Failed to setup notifications:', error);
+        // App continues functioning even if notifications fail
+      }
+    };
 
-  useEffect(() => {
-    configureNotifications();
+    // Delay execution to avoid race conditions with native module initialization
+    const timer = setTimeout(() => {
+      void setupNotifications();
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   if (!loaded) {
@@ -93,7 +104,11 @@ function RootLayoutNav() {
 
   useEffect(() => {
     // Keep NativeWind's color scheme in sync so dark variants + tokens can respond.
-    void setColorScheme(themePref);
+    try {
+      setColorScheme(themePref);
+    } catch (error) {
+      console.warn('Failed to set color scheme:', error);
+    }
   }, [setColorScheme, themePref]);
 
   const effectiveScheme = themePref === 'system' ? systemScheme : themePref;
@@ -114,7 +129,7 @@ function RootLayoutNav() {
           <Stack.Screen name="(admin)" />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
-        <BiometricLockOverlay />
+        {/* <BiometricLockOverlay /> */}
       </ThemeProvider>
     </SafeAreaProvider>
   );

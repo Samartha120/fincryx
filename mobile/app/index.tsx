@@ -16,10 +16,17 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([initialize(), initPreferences()]);
-      setHasInitialized(true);
+      try {
+        await Promise.all([initialize(), initPreferences()]);
+        setHasInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        // Still mark as initialized to prevent infinite loading
+        // App will work with default state if initialization fails
+        setHasInitialized(true);
+      }
     };
-    init();
+    void init();
   }, []);
 
   useEffect(() => {
@@ -32,9 +39,14 @@ export default function SplashScreen() {
 
     if (isAuthenticated && user) {
       // Check for Biometric Lock on Startup
-      const { biometricEnabled } = usePreferencesStore.getState();
-      if (biometricEnabled) {
-        useAuthStore.getState().setLocked(true);
+      try {
+        const { biometricEnabled } = usePreferencesStore.getState();
+        if (biometricEnabled) {
+          useAuthStore.getState().setLocked(true);
+        }
+      } catch (error) {
+        console.warn('Failed to check biometric preference:', error);
+        // Continue without biometric lock if it fails
       }
 
       // Redirect based on role

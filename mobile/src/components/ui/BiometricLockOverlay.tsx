@@ -3,9 +3,8 @@ import { useAuthStore } from '@/src/store/useAuthStore';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus, Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function BiometricLockOverlay() {
@@ -17,7 +16,12 @@ export function BiometricLockOverlay() {
     const [biometricType, setBiometricType] = useState('Biometrics');
 
     useEffect(() => {
-        BiometricService.getBiometricTypeAsync().then(setBiometricType);
+        BiometricService.getBiometricTypeAsync()
+            .then(setBiometricType)
+            .catch((error) => {
+                console.warn('Failed to get biometric type:', error);
+                setBiometricType('Biometrics');
+            });
     }, []);
 
     // 1. Listen to AppState to auto-lock
@@ -55,22 +59,35 @@ export function BiometricLockOverlay() {
 
 
     // 2. Trigger Biometric Prompt when Locked
-    useEffect(() => {
-        if (isLocked) {
-            handleUnlock();
-        }
-    }, [isLocked]);
+    const [hasTriedUnlock, setHasTriedUnlock] = useState(false);
 
-    const handleUnlock = async () => {
+    const handleUnlock = useCallback(async () => {
         try {
             const success = await unlockWithBiometrics();
             if (success) {
                 setLocked(false);
+            } else {
+                // Reset so user can try again
+                setHasTriedUnlock(false);
             }
         } catch (e) {
             console.error('Unlock failed', e);
+            // Reset so user can try again
+            setHasTriedUnlock(false);
         }
-    };
+    }, [unlockWithBiometrics, setLocked]);
+
+    useEffect(() => {
+        if (isLocked && !hasTriedUnlock) {
+            setHasTriedUnlock(true);
+            void handleUnlock();
+        }
+
+        // Reset when unlocked
+        if (!isLocked) {
+            setHasTriedUnlock(false);
+        }
+    }, [isLocked, hasTriedUnlock, handleUnlock]);
 
     const handleLogout = async () => {
         setLocked(false);
@@ -81,9 +98,7 @@ export function BiometricLockOverlay() {
     if (!isLocked) return null;
 
     return (
-        <Animated.View
-            entering={FadeIn}
-            exiting={FadeOut}
+        <View
             style={[styles.container, { paddingTop: insets.top }]}
         >
             <View style={styles.content}>
@@ -94,10 +109,10 @@ export function BiometricLockOverlay() {
                 <Text style={styles.subtitle}>Unlock securely to continue</Text>
 
                 <Pressable onPress={handleUnlock} style={styles.button}>
-                    <MaterialCommunityIcons 
-                        name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'} 
-                        size={24} 
-                        color="#FFFFFF" 
+                    <MaterialCommunityIcons
+                        name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'}
+                        size={24}
+                        color="#FFFFFF"
                     />
                     <Text style={styles.buttonText}>Unlock with {biometricType}</Text>
                 </Pressable>
@@ -106,7 +121,7 @@ export function BiometricLockOverlay() {
                     <Text style={[styles.buttonText, styles.secondaryButtonText]}>Log Out</Text>
                 </Pressable>
             </View>
-        </Animated.View>
+        </View>
     );
 }
 
