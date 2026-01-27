@@ -1,0 +1,45 @@
+diff --git a/node_modules/react-native-screens/android/CMakeLists.txt b/node_modules/react-native-screens/android/CMakeLists.txt
+index 86ec079..f535da1 100644
+--- a/node_modules/react-native-screens/android/CMakeLists.txt
++++ b/node_modules/react-native-screens/android/CMakeLists.txt
+@@ -34,9 +34,18 @@ target_compile_definitions(
+     rnscreens
+     PRIVATE
+     -DFOLLY_NO_CONFIG=1
++    -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION
++)
++
++# Force undefine RN_SERIALIZABLE_STATE to avoid folly::dynamic errors
++target_compile_options(
++    rnscreens
++    PRIVATE
++    "-URN_SERIALIZABLE_STATE"
+ )
+ 
+ find_package(ReactAndroid REQUIRED CONFIG)
++find_library(CPP_SHARED_LIB c++_shared)
+ 
+ if(${RNS_NEW_ARCH_ENABLED})
+     find_package(fbjni REQUIRED CONFIG)
+@@ -47,6 +56,7 @@ if(${RNS_NEW_ARCH_ENABLED})
+             ReactAndroid::jsi
+             fbjni::fbjni
+             android
++            ${CPP_SHARED_LIB}
+         )
+     else()
+         target_link_libraries(
+@@ -70,11 +80,13 @@ if(${RNS_NEW_ARCH_ENABLED})
+                 ReactAndroid::react_render_observers_events
+                 fbjni::fbjni
+                 android
++                ${CPP_SHARED_LIB}
+         )
+     endif()
+ else()
+     target_link_libraries(rnscreens
+         ReactAndroid::jsi
+         android
++        ${CPP_SHARED_LIB}
+     )
+ endif()

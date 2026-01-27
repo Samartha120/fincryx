@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import 'expo-dev-client'; // Ensure Dev Client handles deep links/errors
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -6,7 +7,6 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme as useNWColorScheme } from 'nativewind';
 import { useEffect } from 'react';
-// import 'react-native-reanimated'; // Temporarily disabled for debugging
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
