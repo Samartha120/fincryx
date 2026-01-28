@@ -39,6 +39,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-linking",
       [
         "expo-camera",
         {
@@ -69,9 +70,8 @@
       "apiUrl": "https://fincyrx.onrender.com",
       "router": {},
       "eas": {
-       
+        "projectId": "1ff7e5f3-4837-47a0-82cc-177ed32db8f4"
       }
     }
- 
   }
 }
