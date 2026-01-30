@@ -1,0 +1,750 @@
+# Fincryx Banking App - Complete Project Report
+
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Frontend Architecture (Mobile App)](#frontend-architecture)
+3. [Backend Architecture (API Server)](#backend-architecture)
+4. [Recent Fixes & Updates](#recent-fixes--updates)
+5. [Development Workflow](#development-workflow)
+6. [Known Issues & Limitations](#known-issues--limitations)
+
+---
+
+## Project Overview
+
+**Fincryx** is a modern, full-stack mobile banking application built with React Native (Expo) and Node.js. It provides core banking features including account management, money transfers, loan applications, transaction history, and analytics — all secured with biometric authentication and push notifications.
+
+| Aspect | Details |
+|--------|---------|
+| **Type** | Full-stack mobile banking app |
+| **Platform** | Android (with iOS support planned) |
+| **Repository** | `E:\Project` |
+| **Deployment** | Backend: Render.com, Mobile: EAS Build |
+| **Last Updated** | 2026-01-29 |
+
+---
+
+## Frontend Architecture
+
+### Technology Stack
+
+| Category | Technology | Version |
+|----------|------------|---------|
+| **Framework** | Expo (managed workflow) | SDK 54 |
+| **Runtime** | React Native | 0.81.5 |
+| **Architecture** | New Architecture (Fabric + TurboModules) | Enabled |
+| **Language** | TypeScript | 5.9.2 |
+| **Navigation** | expo-router | 6.0.22 |
+| **State Management** | Zustand | 5.0.10 |
+| **Styling** | NativeWind + TailwindCSS | 4.2.1 / 3.4.19 |
+| **Forms** | React Hook Form + Zod | 7.71.0 / 4.3.5 |
+| **HTTP Client** | Axios | 1.13.2 |
+| **Charts** | Victory Native | 36.6.12 |
+| **Testing** | Jest + React Native Testing Library | 29.7.0 |
+
+### Project Structure
+
+```
+mobile/
+├── app/                          # File-based routing (expo-router)
+│   ├── index.tsx                 # Landing/splash screen
+│   ├── _layout.tsx               # Root layout with providers
+│   ├── (auth)/                   # Auth flow
+│   │   ├── _layout.tsx
+│   │   ├── login.tsx
+│   │   ├── register.tsx
+│   │   └── forgot-password.tsx
+│   ├── (tabs)/                   # Main app (bottom tabs)
+│   │   ├── _layout.tsx           # Tab navigator config
+│   │   ├── index.tsx             # Dashboard (home)
+│   │   ├── analytics.tsx         # Financial analytics
+│   │   ├── loans.tsx             # Loan management
+│   │   ├── transactions.tsx      # Transaction history
+│   │   ├── transfer.tsx          # Money transfer
+│   │   ├── profile.tsx           # User profile
+│   │   ├── settings.tsx          # App settings
+│   │   └── notifications.tsx     # Push notifications inbox
+│   ├── (admin)/                  # Admin panel
+│   │   ├── _layout.tsx
+│   │   ├── dashboard.tsx
+│   │   └── users.tsx
+│   ├── settings/                 # Nested settings routes
+│   │   ├── account.tsx
+│   │   ├── security.tsx
+│   │   └── preferences.tsx
+│   ├── user/                     # User-specific screens
+│   │   └── [id].tsx              # Public user profile
+│   ├── design-preview.tsx        # Design system preview
+│   ├── offline.tsx               # Offline fallback screen
+│   └── modal.tsx                 # Generic modal screen
+│
+├── src/                          # Source code
+│   ├── api/                      # API client functions
+│   │   ├── accountsApi.ts
+│   │   ├── adminApi.ts
+│   │   ├── analyticsApi.ts
+│   │   ├── authApi.ts
+│   │   ├── loansApi.ts
+│   │   ├── pushApi.ts
+│   │   └── transactionsApi.ts
+│   │
+│   ├── components/               # Reusable components
+│   │   ├── analytics/            # Chart components
+│   │   ├── dashboard/            # Dashboard widgets
+│   │   ├── settings/             # Settings UI components
+│   │   └── ui/                   # Generic UI components
+│   │       ├── BiometricLockOverlay.tsx
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx
+│   │       └── Input.tsx
+│   │
+│   ├── lib/                      # Utilities & helpers
+│   │   ├── cn.ts                 # Class name utility
+│   │   ├── env.ts                # Environment config
+│   │   ├── http.ts               # Axios instance + interceptors
+│   │   ├── jwt.ts                # JWT utilities
+│   │   ├── money.ts              # Currency formatting
+│   │   └── pushNotifications.ts  # Push notification setup
+│   │
+│   ├── services/                 # Business logic services
+│   │   ├── biometric.service.ts  # Biometric authentication
+│   │   └── notification.service.ts # Local notifications
+│   │
+│   ├── store/                    # Zustand state stores
+│   │   ├── authStore.ts          # Legacy auth store
+│   │   ├── useAuthStore.ts       # Auth store with biometrics
+│   │   └── usePreferencesStore.ts # User preferences (theme, etc.)
+│   │
+│   └── utils/                    # Helper utilities
+│       ├── biometrics.ts         # Safe wrapper for expo-local-authentication
+│       └── camera.tsx            # QR scanner wrapper
+│
+├── assets/                       # Static assets
+│   ├── images/
+│   │   ├── icon.png
+│   │   ├── splash-icon.png
+│   │   ├── adaptive-icon.png
+│   │   └── favicon.png
+│   └── fonts/
+│       └── SpaceMono-Regular.ttf
+│
+├── patches/                      # npm package patches
+│   ├── expo-modules-core+3.0.29.patch (C++17/20 compatibility)
+│   ├── react-native+0.81.5.patch (std::format fix)
+│   ├── react-native-reanimated+4.1.6.patch (c++_shared linking)
+│   ├── react-native-screens+4.16.0.patch (C++17 + linking)
+│   └── react-native-worklets+0.5.1.patch (C++17 + linking)
+│
+├── __tests__/                    # Jest test suite
+│   ├── analyticsCharts.test.tsx
+│   ├── biometrics.test.tsx
+│   ├── dashboard.test.tsx
+│   ├── linking.test.tsx
+│   ├── login.test.tsx
+│   ├── notifications.test.tsx
+│   └── transfer.test.tsx
+│
+├── app.json                      # Expo configuration
+├── eas.json                      # EAS Build configuration
+├── package.json                  # Dependencies
+├── tsconfig.json                 # TypeScript config
+├── tailwind.config.js            # TailwindCSS config
+├── metro.config.js               # Metro bundler config
+├── babel.config.js               # Babel config
+├── jest.config.js                # Jest config
+├── jest.setup.ts                 # Jest setup with mocks
+└── global.css                    # Global styles (NativeWind)
+```
+
+### Key Features
+
+#### 1. **Biometric Authentication**
+- Face ID / Touch ID support via `expo-local-authentication`
+- Secure storage of refresh tokens using `expo-secure-store`
+- Automatic app locking when backgrounded
+- Biometric unlock prompt on app resume
+- Fallback to passcode if biometrics fail
+- Located in: [src/services/biometric.service.ts](file:///E:/Project/mobile/src/services/biometric.service.ts), [src/components/ui/BiometricLockOverlay.tsx](file:///E:/Project/mobile/src/components/ui/BiometricLockOverlay.tsx)
+
+#### 2. **Push Notifications**
+- Native push notifications via `expo-notifications`
+- System notification channels (Android 8+)
+- Permission handling with graceful fallbacks
+- Notification inbox screen
+- Located in: [src/lib/pushNotifications.ts](file:///E:/Project/mobile/src/lib/pushNotifications.ts), `app/(tabs)/notifications.tsx`
+
+#### 3. **QR Code Scanning**
+- User-to-user QR code scanning for transfers
+- Camera permissions handling
+- Public profile viewing via scanned QR
+- Located in: [src/utils/camera.tsx](file:///E:/Project/mobile/src/utils/camera.tsx)
+
+#### 4. **Financial Analytics**
+- Transaction flow chart (income vs expenses)
+- Transfer activity visualization
+- Spending habits breakdown
+- Liabilities tracking
+- Located in: `app/(tabs)/analytics.tsx`, `src/components/analytics/`
+
+#### 5. **Dark Mode**
+- System-aware dark mode
+- Manual theme toggle in settings
+- Synced with NativeWind and React Navigation
+- Located in: [src/store/usePreferencesStore.ts](file:///E:/Project/mobile/src/store/usePreferencesStore.ts), [app/_layout.tsx](file:///E:/Project/mobile/app/_layout.tsx)
+
+#### 6. **Offline Support**
+- Offline screen with connectivity status
+- Graceful degradation when backend is unreachable
+- Located in: [app/offline.tsx](file:///E:/Project/mobile/app/offline.tsx)
+
+### State Management Architecture
+
+#### Zustand Stores
+
+1. **`useAuthStore`** ([src/store/useAuthStore.ts](file:///E:/Project/mobile/src/store/useAuthStore.ts))
+   - User authentication state
+   - Token management (access + refresh)
+   - Login/logout/register actions
+   - Biometric login integration
+   - Auto-refresh token mechanism
+
+2. **`usePreferencesStore`** ([src/store/usePreferencesStore.ts](file:///E:/Project/mobile/src/store/usePreferencesStore.ts))
+   - Theme preference (light/dark/system)
+   - Biometric authentication toggle
+   - Notification preferences
+   - Persisted to AsyncStorage
+
+### API Integration Layer
+
+All API calls are centralized in `src/api/` with individual modules:
+
+- **Authentication**: Login, register, refresh token, logout
+- **Accounts**: Fetch user accounts and balances
+- **Transactions**: List transactions, create transfers
+- **Loans**: List loans, apply for new loans, make payments
+- **Analytics**: Dashboard stats, chart data
+- **Admin**: User management, transaction oversight
+
+#### HTTP Client ([src/lib/http.ts](file:///E:/Project/mobile/src/lib/http.ts))
+
+- Axios instance with base URL from environment config
+- Request interceptor: Adds JWT access token to headers
+- Response interceptor: Auto-refreshes token on 401 errors
+- Error handling with user-friendly messages
+
+### UI/UX Design Patterns
+
+#### Design System ([DESIGN_SYSTEM.md](file:///E:/Project/mobile/DESIGN_SYSTEM.md))
+
+- **Colors**: Primary (blue), success (green), error (red), warning (yellow)
+- **Typography**: Size scale from xs (12px) to 4xl (36px)
+- **Spacing**: Consistent 4px grid system
+- **Shadows**: Elevation levels (sm, md, lg, xl)
+- **Border Radius**: Subtle (4px) to large (16px)
+
+#### Component Library
+
+Located in `src/components/ui/`:
+- `Button.tsx`: Primary, secondary, outline variants
+- `Card.tsx`: Container with elevation
+- `Input.tsx`: Text input with validation states
+- [BiometricLockOverlay.tsx](file:///E:/Project/mobile/src/components/ui/BiometricLockOverlay.tsx): Full-screen lock screen
+
+### Testing Strategy
+
+#### Test Coverage (7 test files)
+
+| File | Purpose |
+|------|---------|
+| [analyticsCharts.test.tsx](file:///E:/Project/mobile/__tests__/analyticsCharts.test.tsx) | Victory charts rendering |
+| [biometrics.test.tsx](file:///E:/Project/mobile/__tests__/biometrics.test.tsx) | Biometric service mocking |
+| [dashboard.test.tsx](file:///E:/Project/mobile/__tests__/dashboard.test.tsx) | Dashboard UI components |
+| [linking.test.tsx](file:///E:/Project/mobile/__tests__/linking.test.tsx) | Deep linking (mobile:// scheme) |
+| [login.test.tsx](file:///E:/Project/mobile/__tests__/login.test.tsx) | Login flow and validation |
+| [notifications.test.tsx](file:///E:/Project/mobile/__tests__/notifications.test.tsx) | Push notification mocks |
+| [transfer.test.tsx](file:///E:/Project/mobile/__tests__/transfer.test.tsx) | Money transfer feature |
+
+#### Mocking Strategy ([jest.setup.ts](file:///E:/Project/mobile/jest.setup.ts))
+
+- Mocks all native modules (expo-linking, expo-local-authentication, etc.)
+- Mocks AsyncStorage for store persistence
+- Mocks Axios for API calls
+- Mocks React Native components (Animated, etc.)
+
+---
+
+## Backend Architecture
+
+### Technology Stack
+
+| Category | Technology | Version |
+|----------|------------|---------|
+| **Runtime** | Node.js | 22.x |
+| **Framework** | Express | 5.2.1 |
+| **Database** | MongoDB | via Mongoose 9.1.3 |
+| **Authentication** | JWT + bcrypt | 9.0.3 / 6.0.0 |
+| **Validation** | Zod | 4.3.5 |
+| **Security** | Helmet + CORS + Rate Limiting | Latest |
+| **Email** | Nodemailer | 6.10.1 |
+| **Logging** | Morgan | 1.10.1 |
+
+### Project Structure
+
+```
+backend/
+├── dist/                         # Compiled JavaScript (production)
+│   ├── server.js                 # Entry point
+│   ├── app.js                    # Express app configuration
+│   │
+│   ├── config/                   # Configuration
+│   │   ├── db.js                 # MongoDB connection
+│   │   └── env.js                # Environment variables
+│   │
+│   ├── models/                   # Mongoose schemas
+│   │   ├── User.js               # User model
+│   │   ├── Account.js            # Bank account model
+│   │   ├── Transaction.js        # Transaction model
+│   │   ├── Loan.js               # Loan model
+│   │   ├── RefreshToken.js       # Refresh token model
+│   │   └── index.js              # Model exports
+│   │
+│   ├── controllers/              # Route handlers
+│   │   ├── auth/                 # Auth controller
+│   │   ├── accounts/             # Accounts controller
+│   │   ├── transactions/         # Transactions controller
+│   │   ├── loans/                # Loans controller
+│   │   ├── analytics/            # Analytics controller
+│   │   ├── user/                 # User profile controller
+│   │   └── admin/                # Admin controller
+│   │
+│   ├── routes/                   # Express routes
+│   │   ├── auth/                 # /api/auth
+│   │   ├── accounts/             # /api/accounts
+│   │   ├── transactions/         # /api/transactions
+│   │   ├── loans/                # /api/loans
+│   │   ├── analytics/            # /api/analytics
+│   │   ├── user/                 # /api/user
+│   │   └── admin/                # /api/admin
+│   │
+│   ├── middlewares/              # Express middlewares
+│   │   ├── auth.js               # JWT verification
+│   │   ├── errorHandler.js       # Global error handler
+│   │   ├── validate.js           # Zod validation middleware
+│   │   └── adminAuth.js          # Admin role check
+│   │
+│   ├── services/                 # Business logic
+│   │   ├── authService.js        # Auth logic
+│   │   ├── accountService.js     # Account operations
+│   │   ├── transactionService.js # Transaction processing
+│   │   └── loanService.js        # Loan processing
+│   │
+│   ├── validators/               # Zod schemas
+│   │   ├── authValidators.js     # Login, register schemas
+│   │   ├── transactionValidators.js
+│   │   └── loanValidators.js
+│   │
+│   └── utils/                    # Helper functions
+│       ├── jwt.js                # JWT sign/verify
+│       ├── hash.js               # bcrypt utilities
+│       └── email.js              # Email sending
+│
+├── src/                          # TypeScript source (minimal)
+│   ├── app.ts
+│   └── server.ts
+│
+├── .env                          # Environment variables (not committed)
+├── package.json                  # Dependencies
+├── tsconfig.json                 # TypeScript config
+└── render.yaml                   # Render.com deployment config
+```
+
+### Database Models
+
+#### 1. **User Model**
+```javascript
+{
+  _id: ObjectId,
+  name: String,
+  email: String (unique),
+  password: String (hashed),
+  phone: String,
+  address: String,
+  dateOfBirth: Date,
+  role: String (enum: 'user', 'admin'),
+  isActive: Boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### 2. **Account Model**
+```javascript
+{
+  _id: ObjectId,
+  userId: ObjectId (ref: User),
+  accountNumber: String (unique),
+  accountType: String (enum: 'savings', 'checking', 'credit'),
+  balance: Number,
+  currency: String (default: 'NPR'),
+  isActive: Boolean,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### 3. **Transaction Model**
+```javascript
+{
+  _id: ObjectId,
+  fromAccountId: ObjectId (ref: Account),
+  toAccountId: ObjectId (ref: Account),
+  amount: Number,
+  currency: String,
+  type: String (enum: 'transfer', 'deposit', 'withdrawal'),
+  status: String (enum: 'pending', 'completed', 'failed'),
+  description: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### 4. **Loan Model**
+```javascript
+{
+  _id: ObjectId,
+  userId: ObjectId (ref: User),
+  amount: Number,
+  interestRate: Number,
+  term: Number (months),
+  monthlyPayment: Number,
+  remainingBalance: Number,
+  status: String (enum: 'pending', 'approved', 'rejected', 'active', 'paid'),
+  purpose: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### 5. **RefreshToken Model**
+```javascript
+{
+  _id: ObjectId,
+  userId: ObjectId (ref: User),
+  token: String (unique),
+  expiresAt: Date,
+  createdAt: Date
+}
+```
+
+### API Endpoints
+
+#### Authentication (`/api/auth`)
+- `POST /register` - Register new user
+- `POST /login` - Login with email/password
+- `POST /refresh` - Refresh access token
+- `POST /logout` - Logout and invalidate refresh token
+- `GET /me` - Get current user profile
+
+#### Accounts (`/api/accounts`)
+- `GET /` - Get all user accounts
+- `GET /:id` - Get specific account
+- `POST /` - Create new account (admin)
+
+#### Transactions (`/api/transactions`)
+- `GET /` - List user transactions (paginated)
+- `GET /:id` - Get transaction details
+- `POST /transfer` - Create transfer between accounts
+
+#### Loans (`/api/loans`)
+- `GET /` - List user loans
+- `GET /:id` - Get loan details
+- `POST /apply` - Apply for new loan
+- `POST /:id/pay` - Make loan payment
+
+#### Analytics (`/api/analytics`)
+- `GET /dashboard` - Dashboard stats (balance, transactions count)
+- `GET /transaction-flow` - Income vs expenses chart data
+- `GET /spending-habits` - Category breakdown
+- `GET /transfer-activity` - Transfer trends
+
+#### User (`/api/user`)
+- `GET /profile` - Get user profile
+- `PUT /profile` - Update user profile
+- `GET /public/:id` - Get public user info (for QR scanning)
+
+#### Admin (`/api/admin`)
+- `GET /users` - List all users
+- `GET /transactions` - List all transactions
+- `PUT /users/:id/status` - Activate/deactivate user
+
+### Authentication Flow
+
+1. **Registration**: 
+   - Client sends email, password, name
+   - Server hashes password with bcrypt
+   - Creates User and default Account
+   - Returns access token + refresh token
+
+2. **Login**:
+   - Client sends email, password
+   - Server verifies password
+   - Generates JWT access token (15min expiry)
+   - Generates refresh token (7 days expiry)
+   - Stores refresh token in database
+
+3. **Token Refresh**:
+   - Client sends refresh token
+   - Server verifies refresh token from database
+   - Issues new access token
+   - Returns new access token
+
+4. **Protected Routes**:
+   - Client includes access token in `Authorization: Bearer <token>`
+   - Server middleware verifies JWT
+   - Extracts user ID from token
+   - Attaches `req.user` to request
+
+### Security Measures
+
+| Measure | Implementation |
+|---------|---------------|
+| **Password Security** | bcrypt with salt rounds = 10 |
+| **XSS Protection** | Helmet middleware |
+| **CSRF Protection** | CORS with whitelist |
+| **Rate Limiting** | express-rate-limit (100 req/15min) |
+| **Input Validation** | Zod schemas |
+| **SQL Injection** | Mongoose (NoSQL, less vulnerable) |
+| **JWT Secrets** | Environment variables (.env) |
+| **HTTPS** | Enforced in production (Render.com) |
+
+### Deployment (Render.com)
+
+**Backend URL**: `https://fincyrx.onrender.com`
+
+Configuration in [render.yaml](file:///E:/Project/render.yaml):
+```yaml
+services:
+  - type: web
+    name: fincyrx-backend
+    runtime: node
+    plan: free
+    buildCommand: npm run prebuild && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false (secret)
+      - key: JWT_SECRET
+        sync: false (secret)
+```
+
+---
+
+## Recent Fixes & Updates
+
+### 2026-01-29: Permanent Native Module Fixes
+
+#### Issues Resolved
+
+1. ✅ **ExpoLinking Native Module Error**
+   - **Root Cause**: Running app in Expo Go (doesn't include native modules)
+   - **Fix**: Added `expo-linking` to plugins in [app.json](file:///E:/Project/app.json)
+   - **Resolution**: Requires building development client (not Expo Go)
+
+2. ✅ **Removed Obsolete Patch**
+   - **File**: [patches/react-native-screens+4.20.0.patch](file:///E:/Project/mobile/patches/react-native-screens+4.20.0.patch)
+   - **Reason**: Installed version is 4.16.0, patch was for 4.20.0
+
+3. ✅ **Re-enabled Biometric Lock Overlay**
+   - **File**: `app/_layout.tsx:134`
+   - **Change**: Uncommented `<BiometricLockOverlay />`
+   - **Impact**: App now locks on background and unlocks with biometrics
+
+4. ✅ **Re-enabled Push Notifications**
+   - **File**: `app/_layout.tsx:16, 79`
+   - **Change**: Uncommented [configureNotifications()](file:///E:/Project/mobile/src/lib/pushNotifications.ts#7-30)
+   - **Impact**: Push notifications now properly initialize
+
+### Changes Made
+
+| File | Change | Lines |
+|------|--------|-------|
+| [app.json](file:///E:/Project/app.json) | Added `"expo-linking"` to plugins | 42 |
+| [app/_layout.tsx](file:///E:/Project/mobile/app/_layout.tsx) | Uncommented notification import | 16 |
+| [app/_layout.tsx](file:///E:/Project/mobile/app/_layout.tsx) | Re-enabled configureNotifications() | 79 |
+| [app/_layout.tsx](file:///E:/Project/mobile/app/_layout.tsx) | Uncommented BiometricLockOverlay | 134 |
+| `patches/` | Deleted react-native-screens+4.20.0.patch | N/A |
+
+---
+
+## Development Workflow
+
+### Setup Instructions
+
+#### Prerequisites
+- Node.js 22.x
+- npm or yarn
+- EAS CLI (`npm install -g eas-cli`)
+- Expo CLI (`npm install -g expo-cli`)
+- MongoDB connection string
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+
+#### Mobile App Setup
+
+```powershell
+cd E:\Project\mobile
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Start development server (Expo Go - limited functionality)
+npx expo start
+
+# Build development client (REQUIRED for native modules)
+eas build --profile development --platform android
+
+# Run on device/emulator with dev client
+npx expo start --dev-client
+```
+
+#### Backend Setup
+
+```powershell
+cd E:\Project\backend
+
+# Install dependencies
+npm install
+
+# Set environment variables in .env file
+# Required: MONGODB_URI, JWT_SECRET, JWT_REFRESH_SECRET
+
+# Build (if TypeScript source exists)
+npm run build
+
+# Start server
+npm start
+
+# Server runs on http://localhost:3000 (or PORT from .env)
+```
+
+### Environment Variables
+
+#### Mobile (`mobile/.env` - not tracked)
+```env
+EXPO_PUBLIC_API_URL=http://localhost:3000
+# Or production: https://fincyrx.onrender.com
+```
+
+Accessed via: [src/lib/env.ts](file:///E:/Project/mobile/src/lib/env.ts)
+
+#### Backend ([backend/.env](file:///E:/Project/backend/.env) - not tracked)
+```env
+NODE_ENV=development
+PORT=3000
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your-secret-key
+JWT_REFRESH_SECRET=your-refresh-secret-key
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+```
+
+### Building for Production
+
+#### Mobile (via EAS)
+
+```powershell
+# Android APK (internal distribution)
+eas build --profile preview --platform android
+
+# Android AAB (Google Play)
+eas build --profile production --platform android
+
+# Submit to Google Play
+eas submit --platform android
+```
+
+#### Backend (Render.com)
+
+Automatic deployment on `git push` to main branch:
+1. Code pushed to GitHub
+2. Render detects changes
+3. Runs `npm run prebuild` + `npm run build`
+4. Starts with `npm start`
+
+---
+
+## Known Issues & Limitations
+
+### Current Issues
+
+#### 1. React Native 0.81.5 C++ Compatibility
+- **Impact**: Requires 6 patches for C++17/20 compatibility
+- **Affected Packages**: 
+  - expo-modules-core
+  - react-native
+  - react-native-reanimated
+  - react-native-screens
+  - react-native-worklets
+- **Workaround**: Patches are applied via `patch-package` on `npm install`
+- **Permanent Fix**: Downgrade to React Native 0.79.x (stable New Arch support)
+
+#### 2. Development Client Required
+- **Impact**: App cannot run in Expo Go (native modules not included)
+- **Solution**: Must build development client via EAS or locally
+- **Command**: `eas build --profile development --platform android`
+
+#### 3. Expo Go Limitations
+- **Missing Modules**: 
+  - expo-linking (deep linking)
+  - expo-local-authentication (biometrics)
+  - expo-camera (QR scanner)
+  - expo-notifications (push notifications)
+- **Workaround**: Use development client instead
+
+### Best Practices
+
+#### Mobile Development
+
+1. **Always use development client** for testing native modules
+2. **Run `patch-package` after `npm install`** to apply patches
+3. **Test on physical device** for biometrics and camera features
+4. **Use TypeScript strictly** - fix all type errors before committing
+5. **Update EAS configuration** when adding new native modules
+
+#### Backend Development
+
+1. **Never commit [.env](file:///E:/Project/backend/.env) file** - keep secrets secure
+2. **Use Zod validation** for all API inputs
+3. **Return consistent error format**: `{ error: "message" }`
+4. **Rate limit all endpoints** to prevent abuse
+5. **Log errors with Morgan** for debugging
+
+#### Git Workflow
+
+1. **Never commit `node_modules/`**
+2. **Commit [.patch](file:///E:/Project/mobile/patches/react-native+0.81.5.patch) files** so patches are applied for other developers
+3. **Use meaningful commit messages**
+4. **Test locally before pushing** to prevent broken deployments
+
+---
+
+## Additional Resources
+
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native New Architecture](https://reactnative.dev/docs/the-new-architecture/landing-page)
+- [EAS Build Documentation](https://docs.expo.dev/build/introduction/)
+- [Mongoose Documentation](https://mongoosejs.com/docs/)
+- [Express.js Guide](https://expressjs.com/en/guide/routing.html)
+
+---
+
+**Last Updated**: 2026-01-29  
+**Maintained by**: Samartha Shrestha  
+**Version**: 1.0.0

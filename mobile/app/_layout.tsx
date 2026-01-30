@@ -13,7 +13,7 @@ import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { usePreferencesStore } from '@/src/store/usePreferencesStore';
-// import { configureNotifications } from '@/src/lib/pushNotifications';
+import { configureNotifications } from '@/src/lib/pushNotifications';
 import { BiometricLockOverlay } from '@/src/components/ui/BiometricLockOverlay';
 
 export {
@@ -76,8 +76,7 @@ export default function RootLayout() {
     // Delay notification setup to ensure native modules are fully initialized
     const setupNotifications = async () => {
       try {
-        // await configureNotifications();
-        console.log("Notifications config disabled for debugging");
+        await configureNotifications();
       } catch (error) {
         console.warn('Failed to setup notifications:', error);
         // App continues functioning even if notifications fail
@@ -131,7 +130,7 @@ function RootLayoutNav() {
           <Stack.Screen name="(admin)" />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
-        {/* <BiometricLockOverlay /> */}
+        <BiometricLockOverlay />
       </ThemeProvider>
     </SafeAreaProvider>
   );
