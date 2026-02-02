@@ -60,9 +60,17 @@ export function BiometricLockOverlay() {
 
     // 2. Trigger Biometric Prompt when Locked
     const [hasTriedUnlock, setHasTriedUnlock] = useState(false);
+    const [isAuthenticating, setIsAuthenticating] = useState(false);
 
     const handleUnlock = useCallback(async () => {
+        // Prevent concurrent authentication attempts
+        if (isAuthenticating) {
+            console.log('Authentication already in progress, skipping');
+            return;
+        }
+
         try {
+            setIsAuthenticating(true);
             const success = await unlockWithBiometrics();
             if (success) {
                 setLocked(false);
@@ -74,11 +82,13 @@ export function BiometricLockOverlay() {
             console.error('Unlock failed', e);
             // Reset so user can try again
             setHasTriedUnlock(false);
+        } finally {
+            setIsAuthenticating(false);
         }
-    }, [unlockWithBiometrics, setLocked]);
+    }, [unlockWithBiometrics, setLocked, isAuthenticating]);
 
     useEffect(() => {
-        if (isLocked && !hasTriedUnlock) {
+        if (isLocked && !hasTriedUnlock && !isAuthenticating) {
             setHasTriedUnlock(true);
             void handleUnlock();
         }
@@ -86,8 +96,9 @@ export function BiometricLockOverlay() {
         // Reset when unlocked
         if (!isLocked) {
             setHasTriedUnlock(false);
+            setIsAuthenticating(false);
         }
-    }, [isLocked, hasTriedUnlock, handleUnlock]);
+    }, [isLocked, hasTriedUnlock, isAuthenticating, handleUnlock]);
 
     const handleLogout = async () => {
         setLocked(false);
