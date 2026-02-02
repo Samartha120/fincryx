@@ -210,19 +210,19 @@ export default function LoginScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex-1 justify-center px-md py-xl">
+          <View className="flex-1 justify-center px-lg py-xl">
             {/* Logo */}
-            <View className="items-center mb-xl">
-              <Logo size={80} showText={true} />
+            <View className="items-center mb-xl mt-lg">
+              <Logo size={100} showText={true} />
             </View>
 
             {/* Header */}
-            <View className="mb-lg">
-              <Text className="text-title text-text-primary mb-2">
+            <View className="mb-xl">
+              <Text className="text-3xl font-bold text-text-primary mb-2 text-center">
                 Welcome Back
               </Text>
-              <Text className="text-body text-text-secondary">
-                Sign in to your Finoryx account
+              <Text className="text-base text-text-secondary text-center">
+                Sign in to continue to Finoryx
               </Text>
             </View>
 
@@ -301,10 +301,10 @@ export default function LoginScreen() {
                   disabled={isLoading}
                   className="mt-4 flex-row items-center justify-center p-4 border border-primary/20 rounded-xl bg-primary/5 active:bg-primary/10"
                 >
-                  <MaterialCommunityIcons 
-                    name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'} 
-                    size={20} 
-                    color="#4F46E5" 
+                  <MaterialCommunityIcons
+                    name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'}
+                    size={20}
+                    color="#4F46E5"
                   />
                   <Text className="ml-2 text-primary font-semibold">Unlock with {biometricType}</Text>
                 </Pressable>
@@ -320,15 +320,20 @@ export default function LoginScreen() {
             </AuthCard>
 
             {/* Footer */}
-            <View className="flex-row items-center justify-center mt-lg">
-              <Text className="text-body text-text-secondary">
+            <View className="flex-row items-center justify-center mt-xl">
+              <Text className="text-base text-text-secondary">
                 Don't have an account?{' '}
               </Text>
               <Pressable onPress={() => router.push('/(auth)/register')} disabled={isLoading}>
-                <Text className="text-body text-primary font-semibold">
+                <Text className="text-base text-primary font-bold">
                   Sign Up
                 </Text>
               </Pressable>
+            </View>
+
+            {/* Branding */}
+            <View className="items-center mt-lg">
+              <Text className="text-xs text-text-secondary/60">Secured by Finoryx Banking</Text>
             </View>
           </View>
         </ScrollView>

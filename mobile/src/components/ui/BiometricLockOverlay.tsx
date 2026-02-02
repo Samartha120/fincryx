@@ -4,8 +4,9 @@ import { usePreferencesStore } from '@/src/store/usePreferencesStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus, Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from 'nativewind';
 
 export function BiometricLockOverlay() {
     const { isLocked, setLocked, isAuthenticated, unlockWithBiometrics, logoutUser } = useAuthStore();
@@ -14,6 +15,8 @@ export function BiometricLockOverlay() {
     const appState = useRef(AppState.currentState);
     const insets = useSafeAreaInsets();
     const [biometricType, setBiometricType] = useState('Biometrics');
+    const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === 'dark';
 
     useEffect(() => {
         BiometricService.getBiometricTypeAsync()
@@ -108,28 +111,41 @@ export function BiometricLockOverlay() {
 
     if (!isLocked) return null;
 
+    // Theme-aware colors
+    const colors = {
+        background: isDark ? 'rgba(11, 16, 32, 0.98)' : 'rgba(249, 250, 251, 0.98)',
+        iconBg: isDark ? 'rgba(59, 130, 246, 0.15)' : 'rgba(79, 70, 229, 0.1)',
+        icon: isDark ? '#6D8CFF' : '#4F46E5',
+        title: isDark ? '#EAF0FF' : '#111827',
+        subtitle: isDark ? '#B0BFE4' : '#6B7280',
+        button: isDark ? '#3B82F6' : '#4F46E5',
+        buttonText: '#FFFFFF',
+        secondaryBorder: isDark ? '#273353' : '#E5E7EB',
+        secondaryText: isDark ? '#B0BFE4' : '#6B7280',
+    };
+
     return (
         <View
-            style={[styles.container, { paddingTop: insets.top }]}
+            style={[styles.container, { paddingTop: insets.top, backgroundColor: colors.background }]}
         >
             <View style={styles.content}>
-                <View style={styles.iconContainer}>
-                    <MaterialCommunityIcons name="shield-lock" size={64} color="#4F46E5" />
+                <View style={[styles.iconContainer, { backgroundColor: colors.iconBg }]}>
+                    <MaterialCommunityIcons name="shield-lock" size={64} color={colors.icon} />
                 </View>
-                <Text style={styles.title}>App Locked</Text>
-                <Text style={styles.subtitle}>Unlock securely to continue</Text>
+                <Text style={[styles.title, { color: colors.title }]}>App Locked</Text>
+                <Text style={[styles.subtitle, { color: colors.subtitle }]}>Unlock securely to continue</Text>
 
-                <Pressable onPress={handleUnlock} style={styles.button}>
+                <Pressable onPress={handleUnlock} style={[styles.button, { backgroundColor: colors.button }]}>
                     <MaterialCommunityIcons
                         name={biometricType === 'Face ID' ? 'face-recognition' : 'fingerprint'}
                         size={24}
-                        color="#FFFFFF"
+                        color={colors.buttonText}
                     />
-                    <Text style={styles.buttonText}>Unlock with {biometricType}</Text>
+                    <Text style={[styles.buttonText, { color: colors.buttonText }]}>Unlock with {biometricType}</Text>
                 </Pressable>
 
-                <Pressable onPress={handleLogout} style={[styles.button, styles.secondaryButton]}>
-                    <Text style={[styles.buttonText, styles.secondaryButtonText]}>Log Out</Text>
+                <Pressable onPress={handleLogout} style={[styles.button, styles.secondaryButton, { borderColor: colors.secondaryBorder }]}>
+                    <Text style={[styles.buttonText, styles.secondaryButtonText, { color: colors.secondaryText }]}>Log Out</Text>
                 </Pressable>
             </View>
         </View>
@@ -139,8 +155,7 @@ export function BiometricLockOverlay() {
 const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(255,255,255,0.98)', // Or use theme colors
-        zIndex: 9999, // Ensure it covers everything
+        zIndex: 9999,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -151,7 +166,6 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 100,
         height: 100,
-        backgroundColor: 'rgba(79, 70, 229, 0.1)',
         borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
@@ -160,17 +174,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#111827',
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 16,
-        color: '#6B7280',
         marginBottom: 32,
     },
     button: {
         flexDirection: 'row',
-        backgroundColor: '#4F46E5',
         paddingHorizontal: 24,
         paddingVertical: 14,
         borderRadius: 12,
@@ -180,17 +191,15 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     buttonText: {
-        color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '600',
     },
     secondaryButton: {
         backgroundColor: 'transparent',
-        marginTop: 16,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        marginTop: 12,
     },
     secondaryButtonText: {
-        color: '#6B7280',
+        fontWeight: '600',
     },
 });

@@ -96,37 +96,37 @@ export default function RegisterScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <KeyboardAvoidingView 
-        behavior={Platform.select({ ios: 'padding', android: 'height' })} 
+      <KeyboardAvoidingView
+        behavior={Platform.select({ ios: 'padding', android: 'height' })}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
         className="flex-1"
       >
-        <ScrollView 
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }} 
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex-1 justify-center px-md py-xl">
+          <View className="flex-1 justify-center px-lg py-xl">
             {/* Logo */}
-            <View className="items-center mb-lg">
-              <Logo size={70} showText={true} />
+            <View className="items-center mb-xl mt-lg">
+              <Logo size={90} showText={true} />
             </View>
 
             {/* Header */}
-            <View className="mb-lg">
-              <Text className="text-title text-text-primary mb-2">
+            <View className="mb-xl">
+              <Text className="text-3xl font-bold text-text-primary mb-2 text-center">
                 Create Account
               </Text>
-              <Text className="text-body text-text-secondary">
-                Join Finoryx and manage your finances
+              <Text className="text-base text-text-secondary text-center">
+                Join Finoryx and start managing your finances
               </Text>
             </View>
 
             {/* Form Card */}
             <AuthCard className="gap-md">
               <TextInputField
-                label="Full Name" 
-                value={fullName} 
+                label="Full Name"
+                value={fullName}
                 onChangeText={(text) => {
                   setFullName(text);
                   if (errors.fullName) setErrors({ ...errors, fullName: undefined });
@@ -186,28 +186,33 @@ export default function RegisterScreen() {
                 </View>
               )}
 
-              <PrimaryButton 
-                title="Create Account" 
-                loading={isLoading} 
+              <PrimaryButton
+                title="Create Account"
+                loading={isLoading}
                 disabled={isLoading}
                 onPress={handleRegister}
-                className="mt-sm" 
+                className="mt-sm"
               />
             </AuthCard>
 
             {/* Footer */}
-            <View className="flex-row items-center justify-center mt-lg">
-              <Text className="text-body text-text-secondary">
+            <View className="flex-row items-center justify-center mt-xl">
+              <Text className="text-base text-text-secondary">
                 Already have an account?{' '}
               </Text>
               <Pressable
                 onPress={() => router.replace('/(auth)/login')}
                 disabled={isLoading}
               >
-                <Text className="text-body text-primary font-semibold">
+                <Text className="text-base text-primary font-bold">
                   Sign In
                 </Text>
               </Pressable>
+            </View>
+
+            {/* Branding */}
+            <View className="items-center mt-lg">
+              <Text className="text-xs text-text-secondary/60">Secured by Finoryx Banking</Text>
             </View>
           </View>
         </ScrollView>

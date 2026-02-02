@@ -10,6 +10,7 @@ import {
     Text,
     View,
 } from 'react-native';
+import { useColorScheme } from 'nativewind';
 
 interface ActionSheetOption {
     label: string;
@@ -37,6 +38,8 @@ export function ActionSheet({
 }: ActionSheetProps) {
     const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
     const [showModal, setShowModal] = useState(visible);
+    const { colorScheme } = useColorScheme();
+    const isDark = colorScheme === 'dark';
 
     useEffect(() => {
         if (visible) {
@@ -60,7 +63,7 @@ export function ActionSheet({
 
     return (
         <Modal transparent visible={showModal} onRequestClose={onClose} animationType="none">
-            <View style={styles.overlay}>
+            <View style={[styles.overlay, { backgroundColor: isDark ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.4)' }]}>
                 <Pressable style={styles.backdrop} onPress={onClose} />
                 <Animated.View
                     style={[
@@ -91,8 +94,8 @@ export function ActionSheet({
                                         onClose();
                                     }}
                                     className={`flex-row items-center p-4 rounded-xl mb-2 ${isSelected
-                                            ? 'bg-primary/10'
-                                            : 'active:bg-background-subtle'
+                                        ? 'bg-primary/10'
+                                        : 'active:bg-background-subtle'
                                         }`}
                                 >
                                     <View className="w-8 items-center justify-center mr-3">
@@ -100,10 +103,11 @@ export function ActionSheet({
                                             <FontAwesome
                                                 name={option.icon}
                                                 size={20}
-                                                color={isSelected ? '#3B82F6' : option.color || '#6B7280'}
+                                                className={isSelected ? 'text-primary' : 'text-text-secondary'}
+                                                color={isSelected ? (isDark ? '#6D8CFF' : '#3B82F6') : (option.color || (isDark ? '#B0BFE4' : '#6B7280'))}
                                             />
                                         ) : (
-                                            isSelected && <FontAwesome name="check" size={16} color="#3B82F6" />
+                                            isSelected && <FontAwesome name="check" size={16} color={isDark ? '#6D8CFF' : '#3B82F6'} />
                                         )}
                                     </View>
                                     <Text
@@ -127,7 +131,6 @@ const styles = StyleSheet.create({
     overlay: {
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0,0,0,0.4)',
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
